@@ -103,19 +103,15 @@ public class NetworkManager {
         }
     }
 
-    public synchronized ICacheStorage getCacheStorage() {
-        return cacheStorage;
+    public void setOkHttpClient(OkHttpClient okHttpClient) {
+        this.okHttpClient = okHttpClient;
     }
 
-    public synchronized void setCacheStorage(ICacheStorage cacheStorage) {
+    public void setCacheStorage(ICacheStorage cacheStorage) {
         this.cacheStorage = cacheStorage;
     }
 
-    public synchronized Gson getGson() {
-        return gson;
-    }
-
-    public synchronized void setGson(Gson gson) {
+    public void setGson(Gson gson) {
         this.gson = gson;
     }
 
@@ -146,8 +142,13 @@ public class NetworkManager {
         executor.setExecutorListener(new AbstractExecutor.ExecutorListener() {
             @Override
             public void onResult(boolean success, String error) {
-                requestTable.remove(request.getRequestID());
-                executorTable.remove(request.getRequestID());
+                serialExecutorService.execute(new Runnable() {
+                    @Override
+                    public void run() {
+                        requestTable.remove(request.getRequestID());
+                        executorTable.remove(request.getRequestID());
+                    }
+                });
             }
         });
 
