@@ -100,4 +100,10 @@ public abstract class AbstractExecutor {
         return false;
     }
 
+    protected void onResult(boolean success, String error) {
+        if (executorListener != null) {
+            executorListener.onResult(false, error);
+        }
+    }
+
 }

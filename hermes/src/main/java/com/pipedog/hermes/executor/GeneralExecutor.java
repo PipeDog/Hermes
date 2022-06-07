@@ -15,6 +15,7 @@ import com.pipedog.hermes.utils.RequestUtils;
 import com.pipedog.hermes.utils.UrlUtils;
 
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 import java.io.IOException;
 import java.io.Serializable;
@@ -65,8 +66,8 @@ public class GeneralExecutor extends AbstractExecutor {
             @Override
             public void onFailure(@NotNull Call call, @NotNull IOException e) {
                 executeOnCallbackThread(() -> {
-                    request.getResultListener().onFailure(e, null);
-                    executorListener.onResult(false, e.getMessage());
+                    onRequestFailure(e, null);
+                    onResult(false, e.getMessage());
                 });
             }
 
@@ -155,8 +156,8 @@ public class GeneralExecutor extends AbstractExecutor {
             }
 
             executeOnCallbackThread(() -> {
-                request.getResultListener().onFailure(e, null);
-                executorListener.onResult(false, "Request success but parse failed.");
+                onRequestFailure(e, null);
+                onResult(false, "Request success but parse failed.");
             });
             return;
         }
@@ -172,9 +173,9 @@ public class GeneralExecutor extends AbstractExecutor {
             }
 
             executeOnCallbackThread(() -> {
-                request.getResultListener().onFailure(null, new ResultResponseImpl(
+                onRequestFailure(null, new ResultResponseImpl(
                         code, message, gson.fromJson(finalResponseString, Object.class)));
-                executorListener.onResult(false, "Request failed");
+                onResult(false, "Request failed");
             });
             return;
         }
@@ -195,8 +196,8 @@ public class GeneralExecutor extends AbstractExecutor {
 
         final Object finalEntity = entity;
         executeOnCallbackThread(() -> {
-            request.getResultListener().onSuccess(new ResultResponseImpl(code, message, finalEntity));
-            executorListener.onResult(true, "Request success");
+            onRequestSuccess(new ResultResponseImpl(code, message, finalEntity));
+            onResult(true, "Request success");
         });
     }
 
@@ -239,9 +240,20 @@ public class GeneralExecutor extends AbstractExecutor {
 
     private void callbackCacheData(Object body) {
         executeOnCallbackThread(() -> {
-            request.getResultListener().onSuccess(
-                    new ResultResponseImpl(HTTP_STATUS_OK, "success", body));
+            onRequestSuccess(new ResultResponseImpl(HTTP_STATUS_OK, "success", body));
         });
+    }
+
+    private void onRequestSuccess(ResultResponse response) {
+        if (request.getResultListener() != null) {
+            request.getResultListener().onSuccess(response);
+        }
+    }
+
+    private void onRequestFailure(Exception e, ResultResponse response) {
+        if (request.getResultListener() != null) {
+            request.getResultListener().onFailure(e, response);
+        }
     }
 
 }

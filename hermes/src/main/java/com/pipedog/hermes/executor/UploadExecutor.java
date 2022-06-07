@@ -12,6 +12,7 @@ import com.pipedog.hermes.utils.JsonUtils;
 import com.pipedog.hermes.utils.UrlUtils;
 
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 import java.io.IOException;
 import java.util.Map;
@@ -52,8 +53,8 @@ public class UploadExecutor extends AbstractExecutor {
             @Override
             public void onFailure(@NotNull Call call, @NotNull IOException e) {
                 executeOnCallbackThread(() -> {
-                    request.getUploadListener().onFailure(e, null);
-                    executorListener.onResult(false, e.getMessage());
+                    onUploadFailure(e, null);
+                    onResult(false, e.getMessage());
                 });
             }
 
@@ -126,7 +127,7 @@ public class UploadExecutor extends AbstractExecutor {
         RequestBody progressBody = new HermesRequestBody(fullBody, new IProgressListener() {
             @Override
             public void onProgress(long currentLength, long totalLength) {
-                request.getUploadListener().onProgress(currentLength, totalLength);
+                onUploadProgress(currentLength, totalLength);
             }
         });
 
@@ -145,8 +146,8 @@ public class UploadExecutor extends AbstractExecutor {
             }
 
             executeOnCallbackThread(() -> {
-                request.getUploadListener().onFailure(e, null);
-                executorListener.onResult(false, "Request success but parse failed.");
+                onUploadFailure(e, null);
+                onResult(false, "Request success but parse failed.");
             });
             return;
         }
@@ -162,9 +163,9 @@ public class UploadExecutor extends AbstractExecutor {
             }
 
             executeOnCallbackThread(() -> {
-                request.getUploadListener().onFailure(null, new UploadResponseImpl(
+                onUploadFailure(null, new UploadResponseImpl(
                         code, message, gson.fromJson(finalResponseString, Object.class)));
-                executorListener.onResult(false, "Request failed");
+                onResult(false, "Request failed");
             });
             return;
         }
@@ -180,9 +181,27 @@ public class UploadExecutor extends AbstractExecutor {
 
         final Object finalEntity = entity;
         executeOnCallbackThread(() -> {
-            request.getUploadListener().onSuccess(new UploadResponseImpl(code, message, finalEntity));
-            executorListener.onResult(true, "Request success");
+            onUploadSuccess(new UploadResponseImpl(code, message, finalEntity));
+            onResult(true, "Request success");
         });
+    }
+
+    private void onUploadProgress(long currentLength, long totalLength) {
+        if (request.getUploadListener() != null) {
+            request.getUploadListener().onProgress(currentLength, totalLength);
+        }
+    }
+
+    private void onUploadSuccess(UploadResponse response) {
+        if (request.getUploadListener() != null) {
+            request.getUploadListener().onSuccess(response);
+        }
+    }
+
+    private void onUploadFailure(Exception e, UploadResponse response) {
+        if (request.getUploadListener() != null) {
+            request.getUploadListener().onFailure(e, response);
+        }
     }
 
 

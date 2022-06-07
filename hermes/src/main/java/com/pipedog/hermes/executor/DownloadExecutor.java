@@ -10,6 +10,7 @@ import com.pipedog.hermes.utils.ThreadUtils;
 import com.pipedog.hermes.utils.UrlUtils;
 
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 import java.io.File;
 import java.io.FileOutputStream;
@@ -45,8 +46,8 @@ public class DownloadExecutor extends AbstractExecutor {
             @Override
             public void onFailure(@NotNull Call call, @NotNull IOException e) {
                 executeOnCallbackThread(() -> {
-                    request.getDownloadListener().onFailure(e, null);
-                    executorListener.onResult(false, e.getMessage());
+                    onDownloadFailure(e, null);
+                    onResult(false, e.getMessage());
                 });
             }
 
@@ -111,9 +112,9 @@ public class DownloadExecutor extends AbstractExecutor {
             }
 
             executeOnCallbackThread(() -> {
-                request.getDownloadListener().onFailure(null,
+                onDownloadFailure(null,
                         new DownloadResponseImpl(response.code(), response.message(), null));
-                executorListener.onResult(false, "Download failed!");
+                onResult(false, "Download failed!");
             });
             return;
         }
@@ -152,7 +153,7 @@ public class DownloadExecutor extends AbstractExecutor {
 
                 // 进度更新回调
                 executeOnCallbackThread(() -> {
-                    request.getDownloadListener().onProgress(finalCurrentLength, finalTotalLength);
+                    onDownloadProgress(finalCurrentLength, finalTotalLength);
                 });
             }
 
@@ -160,9 +161,8 @@ public class DownloadExecutor extends AbstractExecutor {
 
             // 下载完成
             executeOnCallbackThread(() -> {
-                request.getDownloadListener().onSuccess(
-                        new DownloadResponseImpl(response.code(), response.message(), fullPath));
-                executorListener.onResult(true, "Download success!");
+                onDownloadSuccess(new DownloadResponseImpl(response.code(), response.message(), fullPath));
+                onResult(true, "Download success!");
             });
         } catch (Exception e) {
             e.printStackTrace();
@@ -172,9 +172,9 @@ public class DownloadExecutor extends AbstractExecutor {
             }
 
             executeOnCallbackThread(() -> {
-                request.getDownloadListener().onFailure(e,
+                onDownloadFailure(e,
                         new DownloadResponseImpl(1000, "Write download data to failed!", null));
-                executorListener.onResult(false, "Write download data to failed!");
+                onResult(false, "Write download data to failed!");
             });
         } finally {
             try {
@@ -187,6 +187,24 @@ public class DownloadExecutor extends AbstractExecutor {
             } catch (Exception e) {
                 e.printStackTrace();
             }
+        }
+    }
+
+    private void onDownloadProgress(long currentLength, long totalLength) {
+        if (request.getDownloadListener() != null) {
+            request.getDownloadListener().onProgress(currentLength, totalLength);
+        }
+    }
+
+    private void onDownloadFailure(Exception e, DownloadResponse response) {
+        if (request.getDownloadListener() != null) {
+            request.getDownloadListener().onFailure(e, response);
+        }
+    }
+
+    private void onDownloadSuccess(DownloadResponse response) {
+        if (request.getDownloadListener() != null) {
+            request.getDownloadListener().onSuccess(response);
         }
     }
 

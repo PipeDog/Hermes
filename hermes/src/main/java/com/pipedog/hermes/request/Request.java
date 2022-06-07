@@ -2,6 +2,11 @@ package com.pipedog.hermes.request;
 
 import android.content.Context;
 
+import androidx.annotation.NonNull;
+import androidx.lifecycle.Lifecycle;
+import androidx.lifecycle.LifecycleEventObserver;
+import androidx.lifecycle.LifecycleOwner;
+
 import com.pipedog.hermes.manager.IRequestFilter;
 import com.pipedog.hermes.manager.NetworkManager;
 import com.pipedog.hermes.request.interfaces.IDownloadSettings;
@@ -16,6 +21,7 @@ import com.pipedog.hermes.enums.RequestType;
 import com.pipedog.hermes.enums.SerializerType;
 import com.pipedog.hermes.utils.RequestIDGenerator;
 
+import java.lang.ref.WeakReference;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -47,6 +53,7 @@ public class Request implements RequestSettings {
     private IUploadListener uploadListener;
     private HermesMultipartBody multipartBody;
     private IDownloadSettings downloadSettings;
+    private LifecycleEventObserverImpl lifecycleObserver;
 
 
     // PUBLIC STATIC METHODS
@@ -143,6 +150,30 @@ public class Request implements RequestSettings {
         NetworkManager.getInstance().cancelRequest(this);
     }
 
+    /**
+     * 请求实例销毁
+     */
+    public void destory() {
+        if (resultListener != null) {
+            resultListener = null;
+        }
+        if (downloadListener != null) {
+            downloadListener = null;
+        }
+        if (uploadListener != null) {
+            uploadListener = null;
+        }
+        if (multipartBody != null) {
+            multipartBody = null;
+        }
+        if (downloadSettings != null) {
+            downloadSettings = null;
+        }
+        if (lifecycleObserver != null) {
+            lifecycleObserver = null;
+        }
+    }
+
 
     // SETTER METHODS
 
@@ -209,6 +240,16 @@ public class Request implements RequestSettings {
 
     public void setExecuting(boolean executing) {
         this.executing = executing;
+    }
+
+    @Override
+    public void bindLifecycle(Lifecycle lifecycle) {
+        if (lifecycle == null) {
+            return;
+        }
+
+        lifecycleObserver = new LifecycleEventObserverImpl(this);
+        lifecycle.addObserver(lifecycleObserver);
     }
 
 
@@ -287,6 +328,30 @@ public class Request implements RequestSettings {
 
     public IDownloadSettings getDownloadSettings() {
         return downloadSettings;
+    }
+
+
+    // PRIVATE STATIC CLASSES
+
+    private static class LifecycleEventObserverImpl implements LifecycleEventObserver {
+        private WeakReference<Request> weakReference;
+
+        public LifecycleEventObserverImpl(Request request) {
+            this.weakReference = new WeakReference<>(request);
+        }
+
+        @Override
+        public void onStateChanged(@NonNull LifecycleOwner source, @NonNull Lifecycle.Event event) {
+            Request request = weakReference.get();
+            if (request == null) { return; }
+
+            switch (event) {
+                case ON_DESTROY: {
+                    request.destory();
+                } break;
+                default: break;
+            }
+        }
     }
 
 }

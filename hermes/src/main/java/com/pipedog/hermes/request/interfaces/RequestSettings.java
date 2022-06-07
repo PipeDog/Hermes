@@ -2,6 +2,8 @@ package com.pipedog.hermes.request.interfaces;
 
 import android.content.Context;
 
+import androidx.lifecycle.Lifecycle;
+
 import com.pipedog.hermes.enums.CachePolicy;
 import com.pipedog.hermes.enums.RequestType;
 import com.pipedog.hermes.enums.SerializerType;
@@ -72,5 +74,10 @@ public interface RequestSettings {
      * 扩展字段，可以在这里设置一些附加内容
      */
     void setExtra(Object extra);
+
+    /**
+     * 绑定生命周期
+     */
+    void bindLifecycle(Lifecycle lifecycle);
 
 }

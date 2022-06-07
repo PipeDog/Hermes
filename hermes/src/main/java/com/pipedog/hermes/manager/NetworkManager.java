@@ -145,6 +145,7 @@ public class NetworkManager {
                 serialExecutorService.execute(new Runnable() {
                     @Override
                     public void run() {
+                        request.setExecuting(false);
                         requestTable.remove(request.getRequestID());
                         executorTable.remove(request.getRequestID());
                     }
@@ -152,6 +153,7 @@ public class NetworkManager {
             }
         });
 
+        request.setExecuting(true);
         executor.execute();
     }
 
@@ -160,6 +162,8 @@ public class NetworkManager {
         requestTable.remove(request.getRequestID());
         executorTable.remove(request.getRequestID());
         executor.cancel();
+
+        request.setExecuting(false);
     }
 
 }
