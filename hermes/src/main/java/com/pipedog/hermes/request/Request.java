@@ -24,6 +24,7 @@ import com.pipedog.hermes.utils.RequestIDGenerator;
 import java.lang.ref.WeakReference;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 /**
  * @author liang
@@ -46,7 +47,7 @@ public class Request implements RequestSettings {
     private boolean callbackOnMainThread = false;
     private Class<?> responseClass;
 
-    private boolean executing;
+    private AtomicBoolean executing = new AtomicBoolean(false);
     private String requestID;
     private IResultListener resultListener;
     private IDownloadListener downloadListener;
@@ -239,7 +240,7 @@ public class Request implements RequestSettings {
     }
 
     public void setExecuting(boolean executing) {
-        this.executing = executing;
+        this.executing.set(executing);
     }
 
     @Override
@@ -300,7 +301,7 @@ public class Request implements RequestSettings {
     }
 
     public boolean isExecuting() {
-        return executing;
+        return executing.get();
     }
 
     public String getRequestID() {
