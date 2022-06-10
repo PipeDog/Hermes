@@ -108,8 +108,6 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public Request onBuild(Request.Builder builder) {
                 return builder
-                        .baseUrl("https://twxbackend-beta2.test.xdf.cn")
-                        .urlPath("/api/v4.1/cityList")
                         .serializerType(SerializerType.JSON)
                         .cachePolicy(CachePolicy.RETURN_CACHE_DATA_THEN_LOAD)
                         .lifecycle(getLifecycle())
