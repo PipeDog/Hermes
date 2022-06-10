@@ -7,23 +7,19 @@ import android.os.Bundle;
 import com.pipedog.hermes.R;
 
 import androidx.annotation.NonNull;
-import androidx.appcompat.app.AppCompatActivity;
 
 import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
-import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
 import android.widget.ImageView;
 import android.widget.TextView;
 
-import com.pipedog.hermes.R;
 import com.pipedog.hermes.cache.CacheManager;
 import com.pipedog.hermes.enums.CachePolicy;
 import com.pipedog.hermes.request.interfaces.IDownloadSettings;
 import com.pipedog.hermes.request.interfaces.IMultipartBody;
-import com.pipedog.hermes.request.interfaces.RequestSettings;
 import com.pipedog.hermes.enums.RequestType;
 import com.pipedog.hermes.enums.SerializerType;
 import com.pipedog.hermes.request.listener.IDownloadListener;
@@ -105,12 +101,19 @@ public class MainActivity extends AppCompatActivity {
 
     // json
 
+    // json
+
     private void jsonRequest() {
-        Request.build(new Request.Builder() {
+        Request.build(new Request.BuildBlock() {
             @Override
-            public void onBuild(RequestSettings settings) {
-                settings.setSerializerType(SerializerType.JSON);
-                settings.setCachePolicy(CachePolicy.RETURN_CACHE_DATA_THEN_LOAD);
+            public Request onBuild(Request.Builder builder) {
+                return builder
+                        .baseUrl("https://twxbackend-beta2.test.xdf.cn")
+                        .urlPath("/api/v4.1/cityList")
+                        .serializerType(SerializerType.JSON)
+                        .cachePolicy(CachePolicy.RETURN_CACHE_DATA_THEN_LOAD)
+                        .lifecycle(getLifecycle())
+                        .build();
             }
         }).setResultListener(new IResultListener<Map<String, Object>>() {
             @Override
@@ -128,10 +131,10 @@ public class MainActivity extends AppCompatActivity {
     // upload
 
     private void upload() {
-        Request.build(new Request.Builder() {
+        Request.build(new Request.BuildBlock() {
             @Override
-            public void onBuild(RequestSettings settings) {
-
+            public Request onBuild(Request.Builder builder) {
+                return builder.build();
             }
         }).setMultipartBody(new IMultipartBody.Builder() {
             @Override
@@ -159,22 +162,15 @@ public class MainActivity extends AppCompatActivity {
     // download
 
     private void download() {
-        Request.build(new Request.Builder() {
+        Request.build(new Request.BuildBlock() {
             @Override
-            public void onBuild(RequestSettings settings) {
-                try {
-                    String imageUrl = "https://upload-images.jianshu.io/upload_images/5809200-a99419bb94924e6d.jpg?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240";
-                    //                 https://upload-images.jianshu.io/upload_images/5809200-a99419bb94924e6d.jpg?imageMogr2/auto-orient/strip%257CimageView2/2/w/1240
-                    imageUrl = UrlUtils.getEncodedUrl(imageUrl);
-
-                    // https%3A%2F%2Fupload-images.jianshu.io%2Fupload_images%2F5809200-a99419bb94924e6d.jpg%3FimageMogr2%2Fauto-orient%2Fstrip%257CimageView2%2F2%2Fw%2F1240
-                    System.out.println("[encode] " + imageUrl);
-
-                    settings.setBaseUrl(imageUrl);
-                    settings.setRequestType(RequestType.GET);
-                } catch (Exception e) {
-                    e.printStackTrace();
-                }
+            public Request onBuild(Request.Builder builder) {
+                String imageUrl = "https://upload-images.jianshu.io/upload_images/5809200-a99419bb94924e6d.jpg?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240";
+                //                 https://upload-images.jianshu.io/upload_images/5809200-a99419bb94924e6d.jpg?imageMogr2/auto-orient/strip%257CimageView2/2/w/1240
+                imageUrl = UrlUtils.getEncodedUrl(imageUrl);
+                // https%3A%2F%2Fupload-images.jianshu.io%2Fupload_images%2F5809200-a99419bb94924e6d.jpg%3FimageMogr2%2Fauto-orient%2Fstrip%257CimageView2%2F2%2Fw%2F1240
+                System.out.println("[encode] " + imageUrl);
+                return builder.baseUrl(imageUrl).requestType(RequestType.GET).build();
             }
         }).setDownloadSettings(new IDownloadSettings() {
             @Override

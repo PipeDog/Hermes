@@ -1,6 +1,5 @@
 package com.pipedog.hermes.executor;
 
-import com.pipedog.hermes.cache.ICacheListener;
 import com.pipedog.hermes.enums.CachePolicy;
 import com.pipedog.hermes.executor.base.AbstractExecutor;
 import com.pipedog.hermes.log.Logger;
@@ -15,10 +14,8 @@ import com.pipedog.hermes.utils.RequestUtils;
 import com.pipedog.hermes.utils.UrlUtils;
 
 import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
 
 import java.io.IOException;
-import java.io.Serializable;
 import java.util.Map;
 
 import okhttp3.Call;

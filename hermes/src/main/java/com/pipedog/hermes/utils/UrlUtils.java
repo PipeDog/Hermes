@@ -1,13 +1,8 @@
 package com.pipedog.hermes.utils;
 
-import com.pipedog.hermes.request.Request;
-
 import java.net.URI;
 import java.net.URL;
-import java.util.Map;
 import java.util.logging.Logger;
-
-import okhttp3.HttpUrl;
 
 /**
  * @author liang

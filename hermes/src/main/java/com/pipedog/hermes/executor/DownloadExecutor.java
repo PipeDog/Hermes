@@ -6,11 +6,9 @@ import com.pipedog.hermes.request.Request;
 import com.pipedog.hermes.response.DownloadResponse;
 import com.pipedog.hermes.response.internal.DownloadResponseImpl;
 import com.pipedog.hermes.utils.AssertHandler;
-import com.pipedog.hermes.utils.ThreadUtils;
 import com.pipedog.hermes.utils.UrlUtils;
 
 import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
 
 import java.io.File;
 import java.io.FileOutputStream;
