@@ -51,6 +51,10 @@ public class UploadExecutor extends AbstractExecutor {
         okCallback = new Callback() {
             @Override
             public void onFailure(@NotNull Call call, @NotNull IOException e) {
+                if (autoRetryIfNeeded()) {
+                    return;
+                }
+
                 executeOnCallbackThread(() -> {
                     onUploadFailure(e, null);
                     onResult(false, e.getMessage());

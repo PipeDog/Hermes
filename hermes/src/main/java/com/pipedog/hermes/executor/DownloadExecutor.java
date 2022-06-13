@@ -43,6 +43,10 @@ public class DownloadExecutor extends AbstractExecutor {
         okCallback = new Callback() {
             @Override
             public void onFailure(@NotNull Call call, @NotNull IOException e) {
+                if (autoRetryIfNeeded()) {
+                    return;
+                }
+
                 executeOnCallbackThread(() -> {
                     onDownloadFailure(e, null);
                     onResult(false, e.getMessage());

@@ -62,6 +62,10 @@ public class GeneralExecutor extends AbstractExecutor {
         okCallback = new Callback() {
             @Override
             public void onFailure(@NotNull Call call, @NotNull IOException e) {
+                if (autoRetryIfNeeded()) {
+                    return;
+                }
+
                 executeOnCallbackThread(() -> {
                     onRequestFailure(e, null);
                     onResult(false, e.getMessage());
