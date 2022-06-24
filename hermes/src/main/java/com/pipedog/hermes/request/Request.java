@@ -37,7 +37,7 @@ public class Request {
     private Map<String, String> requestHeaders = new HashMap<>();
     private SerializerType serializerType = SerializerType.HTTP;
     private int autoRetryTimes = 1;
-    private boolean callbackOnMainThread = false;
+    private boolean callbackOnMainThread = true;
     private Class<?> responseClass;
 
     private AtomicBoolean executing = new AtomicBoolean(false);
