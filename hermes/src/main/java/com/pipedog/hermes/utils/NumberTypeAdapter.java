@@ -52,30 +52,11 @@ public class NumberTypeAdapter extends TypeAdapter<Object> {
             case NUMBER: {
                 // Number 类型，整型与浮点型转换逻辑处理
 
-                // 包含小数点，返回浮点型
                 String numberString = in.nextString();
                 if (numberString.contains(".")) {
                     return Double.parseDouble(numberString);
                 }
-
-                double dbNum = in.nextDouble();
-
-                // 数字超过 long 的最大值，返回浮点类型
-                if (dbNum > Long.MAX_VALUE) {
-                    return dbNum;
-                }
-
-                // 判断数字是否为整数值
-                long lngNum = (long) dbNum;
-                if (dbNum == lngNum) {
-                    try {
-                        return (int) lngNum;
-                    } catch (Exception e) {
-                        return lngNum;
-                    }
-                } else {
-                    return dbNum;
-                }
+                return Long.parseLong(numberString);
             }
 
             case BOOLEAN: {
