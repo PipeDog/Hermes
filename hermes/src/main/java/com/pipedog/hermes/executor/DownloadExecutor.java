@@ -3,7 +3,7 @@ package com.pipedog.hermes.executor;
 import com.pipedog.hermes.executor.base.AbstractExecutor;
 import com.pipedog.hermes.request.interfaces.IDownloadSettings;
 import com.pipedog.hermes.request.Request;
-import com.pipedog.hermes.response.IResponse;
+import com.pipedog.hermes.response.Response;
 import com.pipedog.hermes.response.RealResponse;
 import com.pipedog.hermes.utils.AssertHandler;
 import com.pipedog.hermes.utils.UrlUtils;
@@ -18,7 +18,6 @@ import java.io.InputStream;
 import okhttp3.Call;
 import okhttp3.Callback;
 import okhttp3.OkHttpClient;
-import okhttp3.Response;
 import okhttp3.ResponseBody;
 
 /**
@@ -54,7 +53,7 @@ public class DownloadExecutor extends AbstractExecutor {
             }
 
             @Override
-            public void onResponse(@NotNull Call call, @NotNull Response response) throws IOException {
+            public void onResponse(@NotNull Call call, @NotNull okhttp3.Response response) throws IOException {
                 handleResponse(response);
             }
         };
@@ -107,7 +106,7 @@ public class DownloadExecutor extends AbstractExecutor {
         }
     }
 
-    private void handleResponse(Response response) {
+    private void handleResponse(okhttp3.Response response) {
         if (response.code() != HTTP_STATUS_OK) {
             if (autoRetryIfNeeded()) {
                 return;
@@ -198,13 +197,13 @@ public class DownloadExecutor extends AbstractExecutor {
         }
     }
 
-    private void onDownloadFailure(Exception e, IResponse response) {
+    private void onDownloadFailure(Exception e, Response response) {
         if (request.getCallback() != null) {
             request.getCallback().onFailure(e, response);
         }
     }
 
-    private void onDownloadSuccess(IResponse response) {
+    private void onDownloadSuccess(Response response) {
         if (request.getCallback() != null) {
             request.getCallback().onSuccess(response);
         }

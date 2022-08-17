@@ -1,6 +1,6 @@
 package com.pipedog.hermes.response;
 
-public interface IResponse<T> {
+public interface Response<T> {
     /**
      * HTTP 状态码
      */

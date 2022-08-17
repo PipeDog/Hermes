@@ -6,7 +6,7 @@ import com.pipedog.hermes.log.Logger;
 import com.pipedog.hermes.request.Request;
 import com.pipedog.hermes.enums.RequestType;
 import com.pipedog.hermes.enums.SerializerType;
-import com.pipedog.hermes.response.IResponse;
+import com.pipedog.hermes.response.Response;
 import com.pipedog.hermes.response.RealResponse;
 import com.pipedog.hermes.utils.AssertHandler;
 import com.pipedog.hermes.utils.JsonUtils;
@@ -23,7 +23,6 @@ import okhttp3.Callback;
 import okhttp3.MediaType;
 import okhttp3.OkHttpClient;
 import okhttp3.RequestBody;
-import okhttp3.Response;
 import okhttp3.ResponseBody;
 
 /**
@@ -73,7 +72,7 @@ public class GeneralExecutor extends AbstractExecutor {
             }
 
             @Override
-            public void onResponse(@NotNull Call call, @NotNull Response response) throws IOException {
+            public void onResponse(@NotNull Call call, @NotNull okhttp3.Response response) throws IOException {
                 handleResponse(response);
             }
         };
@@ -146,7 +145,7 @@ public class GeneralExecutor extends AbstractExecutor {
         }
     }
 
-    private void handleResponse(Response response) {
+    private void handleResponse(okhttp3.Response response) {
         ResponseBody responseBody = response.body();
         String responseString = null;
         try {
@@ -245,13 +244,13 @@ public class GeneralExecutor extends AbstractExecutor {
         });
     }
 
-    private void onRequestSuccess(IResponse response) {
+    private void onRequestSuccess(Response response) {
         if (request.getCallback() != null) {
             request.getCallback().onSuccess(response);
         }
     }
 
-    private void onRequestFailure(Exception e, IResponse response) {
+    private void onRequestFailure(Exception e, Response response) {
         if (request.getCallback() != null) {
             request.getCallback().onFailure(e, response);
         }

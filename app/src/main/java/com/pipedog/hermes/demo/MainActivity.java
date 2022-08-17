@@ -25,7 +25,7 @@ import com.pipedog.hermes.enums.RequestType;
 import com.pipedog.hermes.enums.SerializerType;
 import com.pipedog.hermes.request.Request;
 import com.pipedog.hermes.response.ResponseCallback;
-import com.pipedog.hermes.response.IResponse;
+import com.pipedog.hermes.response.Response;
 import com.pipedog.hermes.utils.JsonUtils;
 import com.pipedog.hermes.utils.UrlUtils;
 
@@ -124,12 +124,12 @@ public class MainActivity extends AppCompatActivity {
             }
         }).setCallback(new ResponseCallback<Map<String, Object>>() {
             @Override
-            public void onSuccess(IResponse<Map<String, Object>> response) {
+            public void onSuccess(Response<Map<String, Object>> response) {
                 System.out.println("body" + response.body());
             }
 
             @Override
-            public void onFailure(@Nullable Exception e, @Nullable IResponse<Map<String, Object>> response) {
+            public void onFailure(@Nullable Exception e, @Nullable Response<Map<String, Object>> response) {
 
             }
         }).send();
@@ -150,12 +150,12 @@ public class MainActivity extends AppCompatActivity {
             }
         }).setCallback(new ResponseCallback<Map<?, ?>>() {
             @Override
-            public void onSuccess(IResponse<Map<?, ?>> response) {
+            public void onSuccess(Response<Map<?, ?>> response) {
 
             }
 
             @Override
-            public void onFailure(@Nullable Exception e, @Nullable IResponse<Map<?, ?>> response) {
+            public void onFailure(@Nullable Exception e, @Nullable Response<Map<?, ?>> response) {
 
             }
         }).send();
@@ -194,14 +194,14 @@ public class MainActivity extends AppCompatActivity {
             }
 
             @Override
-            public void onSuccess(IResponse<String> response) {
+            public void onSuccess(Response<String> response) {
                 System.out.println(response.body());
                 Message msg = handler.obtainMessage(100, response.body());
                 handler.sendMessage(msg);
             }
 
             @Override
-            public void onFailure(@Nullable Exception e, @Nullable IResponse<String> response) {
+            public void onFailure(@Nullable Exception e, @Nullable Response<String> response) {
                 if (e != null) {
                     System.out.println(e.toString());
                 }

@@ -5,7 +5,7 @@ import com.pipedog.hermes.request.Request;
 import com.pipedog.hermes.enums.SerializerType;
 import com.pipedog.hermes.request.internal.HermesMultipartBody;
 import com.pipedog.hermes.request.internal.IProgressListener;
-import com.pipedog.hermes.response.IResponse;
+import com.pipedog.hermes.response.Response;
 import com.pipedog.hermes.response.RealResponse;
 import com.pipedog.hermes.utils.AssertHandler;
 import com.pipedog.hermes.utils.JsonUtils;
@@ -22,7 +22,6 @@ import okhttp3.MediaType;
 import okhttp3.MultipartBody;
 import okhttp3.OkHttpClient;
 import okhttp3.RequestBody;
-import okhttp3.Response;
 import okhttp3.ResponseBody;
 import okio.Buffer;
 import okio.BufferedSink;
@@ -62,7 +61,7 @@ public class UploadExecutor extends AbstractExecutor {
             }
 
             @Override
-            public void onResponse(@NotNull Call call, @NotNull Response response) throws IOException {
+            public void onResponse(@NotNull Call call, @NotNull okhttp3.Response response) throws IOException {
                 handleResponse(response);
             }
         };
@@ -138,7 +137,7 @@ public class UploadExecutor extends AbstractExecutor {
         return okRequest;
     }
 
-    private void handleResponse(Response response) {
+    private void handleResponse(okhttp3.Response response) {
         ResponseBody responseBody = response.body();
         String responseString = null;
         try {
@@ -195,13 +194,13 @@ public class UploadExecutor extends AbstractExecutor {
         }
     }
 
-    private void onUploadSuccess(IResponse response) {
+    private void onUploadSuccess(Response response) {
         if (request.getCallback() != null) {
             request.getCallback().onSuccess(response);
         }
     }
 
-    private void onUploadFailure(Exception e, IResponse response) {
+    private void onUploadFailure(Exception e, Response response) {
         if (request.getCallback() != null) {
             request.getCallback().onFailure(e, response);
         }

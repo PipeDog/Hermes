@@ -1,6 +1,6 @@
 package com.pipedog.hermes.response;
 
-public class RealResponse<T> implements IResponse<T> {
+public class RealResponse<T> implements Response<T> {
 
     /**
      * HTTP 状态码
