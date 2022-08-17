@@ -6,8 +6,8 @@ import com.pipedog.hermes.log.Logger;
 import com.pipedog.hermes.request.Request;
 import com.pipedog.hermes.enums.RequestType;
 import com.pipedog.hermes.enums.SerializerType;
-import com.pipedog.hermes.response.ResultResponse;
-import com.pipedog.hermes.response.internal.ResultResponseImpl;
+import com.pipedog.hermes.response.IResponse;
+import com.pipedog.hermes.response.RealResponse;
 import com.pipedog.hermes.utils.AssertHandler;
 import com.pipedog.hermes.utils.JsonUtils;
 import com.pipedog.hermes.utils.RequestUtils;
@@ -174,7 +174,7 @@ public class GeneralExecutor extends AbstractExecutor {
             }
 
             executeOnCallbackThread(() -> {
-                onRequestFailure(null, new ResultResponseImpl(
+                onRequestFailure(null, new RealResponse(
                         code, message, gson.fromJson(finalResponseString, Object.class)));
                 onResult(false, "Request failed");
             });
@@ -197,7 +197,7 @@ public class GeneralExecutor extends AbstractExecutor {
 
         final Object finalEntity = entity;
         executeOnCallbackThread(() -> {
-            onRequestSuccess(new ResultResponseImpl(code, message, finalEntity));
+            onRequestSuccess(new RealResponse(code, message, finalEntity));
             onResult(true, "Request success");
         });
     }
@@ -241,19 +241,19 @@ public class GeneralExecutor extends AbstractExecutor {
 
     private void callbackCacheData(Object body) {
         executeOnCallbackThread(() -> {
-            onRequestSuccess(new ResultResponseImpl(HTTP_STATUS_OK, "success", body));
+            onRequestSuccess(new RealResponse(HTTP_STATUS_OK, "success", body));
         });
     }
 
-    private void onRequestSuccess(ResultResponse response) {
-        if (request.getResultListener() != null) {
-            request.getResultListener().onSuccess(response);
+    private void onRequestSuccess(IResponse response) {
+        if (request.getCallback() != null) {
+            request.getCallback().onSuccess(response);
         }
     }
 
-    private void onRequestFailure(Exception e, ResultResponse response) {
-        if (request.getResultListener() != null) {
-            request.getResultListener().onFailure(e, response);
+    private void onRequestFailure(Exception e, IResponse response) {
+        if (request.getCallback() != null) {
+            request.getCallback().onFailure(e, response);
         }
     }
 

@@ -8,12 +8,10 @@ import com.pipedog.hermes.manager.NetworkManager;
 import com.pipedog.hermes.request.interfaces.IDownloadSettings;
 import com.pipedog.hermes.request.interfaces.IMultipartBody;
 import com.pipedog.hermes.request.internal.HermesMultipartBody;
-import com.pipedog.hermes.request.listener.IDownloadListener;
-import com.pipedog.hermes.request.listener.IResultListener;
-import com.pipedog.hermes.request.listener.IUploadListener;
 import com.pipedog.hermes.enums.CachePolicy;
 import com.pipedog.hermes.enums.RequestType;
 import com.pipedog.hermes.enums.SerializerType;
+import com.pipedog.hermes.response.ResponseCallback;
 import com.pipedog.hermes.utils.RequestIDGenerator;
 
 import java.lang.ref.WeakReference;
@@ -42,9 +40,7 @@ public class Request {
 
     private AtomicBoolean executing = new AtomicBoolean(false);
     private String requestID;
-    private IResultListener resultListener;
-    private IDownloadListener downloadListener;
-    private IUploadListener uploadListener;
+    private ResponseCallback callback;
     private HermesMultipartBody multipartBody;
     private IDownloadSettings downloadSettings;
     private LifecycleObserverImpl lifecycleObserver;
@@ -83,28 +79,8 @@ public class Request {
 
     // PUBLIC METHODS
 
-    /**
-     * 设置普通 JSON 数据请求监听
-     */
-    public Request setResultListener(IResultListener listener) {
-        resultListener = listener;
-        return this;
-    }
-
-    /**
-     * 设置下载监听
-     * https://juejin.cn/post/6844903970201305095
-     */
-    public Request setDownloadListener(IDownloadListener listener) {
-        downloadListener = listener;
-        return this;
-    }
-
-    /**
-     * 设置上传监听
-     */
-    public Request setUploadListener(IUploadListener listener) {
-        uploadListener = listener;
+    public <T> Request setCallback(ResponseCallback<T> callback) {
+        this.callback = callback;
         return this;
     }
 
@@ -144,14 +120,8 @@ public class Request {
      * 请求实例销毁
      */
     public void destory() {
-        if (resultListener != null) {
-            resultListener = null;
-        }
-        if (downloadListener != null) {
-            downloadListener = null;
-        }
-        if (uploadListener != null) {
-            uploadListener = null;
+        if (callback != null) {
+            callback = null;
         }
         if (multipartBody != null) {
             multipartBody = null;
@@ -229,16 +199,8 @@ public class Request {
         return requestID;
     }
 
-    public IResultListener getResultListener() {
-        return resultListener;
-    }
-
-    public IDownloadListener getDownloadListener() {
-        return downloadListener;
-    }
-
-    public IUploadListener getUploadListener() {
-        return uploadListener;
+    public ResponseCallback getCallback() {
+        return callback;
     }
 
     public HermesMultipartBody getFormData() {

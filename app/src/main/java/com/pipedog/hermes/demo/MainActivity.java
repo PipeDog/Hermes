@@ -1,5 +1,6 @@
 package com.pipedog.hermes.demo;
 
+import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 
 import android.os.Bundle;
@@ -22,13 +23,9 @@ import com.pipedog.hermes.request.interfaces.IDownloadSettings;
 import com.pipedog.hermes.request.interfaces.IMultipartBody;
 import com.pipedog.hermes.enums.RequestType;
 import com.pipedog.hermes.enums.SerializerType;
-import com.pipedog.hermes.request.listener.IDownloadListener;
-import com.pipedog.hermes.request.listener.IResultListener;
 import com.pipedog.hermes.request.Request;
-import com.pipedog.hermes.request.listener.IUploadListener;
-import com.pipedog.hermes.response.ResultResponse;
-import com.pipedog.hermes.response.DownloadResponse;
-import com.pipedog.hermes.response.UploadResponse;
+import com.pipedog.hermes.response.ResponseCallback;
+import com.pipedog.hermes.response.IResponse;
 import com.pipedog.hermes.utils.JsonUtils;
 import com.pipedog.hermes.utils.UrlUtils;
 
@@ -104,6 +101,18 @@ public class MainActivity extends AppCompatActivity {
     // json
 
     private void jsonRequest() {
+//        new ResponseCallback<String>() {
+//            @Override
+//            public void onSuccess(IResponse<String> response) {
+//
+//            }
+//
+//            @Override
+//            public void onFailure(@Nullable Exception e, @Nullable IResponse<String> response) {
+//                response.getBody()
+//            }
+//        }
+
         Request.build(new Request.BuildBlock() {
             @Override
             public Request onBuild(Request.Builder builder) {
@@ -113,14 +122,14 @@ public class MainActivity extends AppCompatActivity {
                         .lifecycle(getLifecycle())
                         .build();
             }
-        }).setResultListener(new IResultListener<Map<String, Object>>() {
+        }).setCallback(new ResponseCallback<Map<String, Object>>() {
             @Override
-            public void onSuccess(ResultResponse<Map<String, Object>> response) {
+            public void onSuccess(IResponse<Map<String, Object>> response) {
                 System.out.println("body" + response.body());
             }
 
             @Override
-            public void onFailure(Exception e, ResultResponse response) {
+            public void onFailure(@Nullable Exception e, @Nullable IResponse<Map<String, Object>> response) {
 
             }
         }).send();
@@ -139,19 +148,14 @@ public class MainActivity extends AppCompatActivity {
             public void onBuild(IMultipartBody formData) {
 
             }
-        }).setUploadListener(new IUploadListener<Map<?, ?>>() {
+        }).setCallback(new ResponseCallback<Map<?, ?>>() {
             @Override
-            public void onProgress(long currentLength, long totalLength) {
+            public void onSuccess(IResponse<Map<?, ?>> response) {
 
             }
 
             @Override
-            public void onSuccess(UploadResponse<Map<?, ?>> response) {
-
-            }
-
-            @Override
-            public void onFailure(Exception e, UploadResponse response) {
+            public void onFailure(@Nullable Exception e, @Nullable IResponse<Map<?, ?>> response) {
 
             }
         }).send();
@@ -175,7 +179,7 @@ public class MainActivity extends AppCompatActivity {
             public String getDestinationFullPath() {
                 return getFullPath();
             }
-        }).setDownloadListener(new IDownloadListener() {
+        }).setCallback(new ResponseCallback<String>() {
             @Override
             public void onProgress(long currentLength, long totalLength) {
                 System.out.println("currentLength = " + currentLength + ", totalLength = " + totalLength);
@@ -190,14 +194,14 @@ public class MainActivity extends AppCompatActivity {
             }
 
             @Override
-            public void onSuccess(DownloadResponse response) {
-                System.out.println(response.filePath());
-                Message msg = handler.obtainMessage(100, response.filePath());
+            public void onSuccess(IResponse<String> response) {
+                System.out.println(response.body());
+                Message msg = handler.obtainMessage(100, response.body());
                 handler.sendMessage(msg);
             }
 
             @Override
-            public void onFailure(Exception e, DownloadResponse response) {
+            public void onFailure(@Nullable Exception e, @Nullable IResponse<String> response) {
                 if (e != null) {
                     System.out.println(e.toString());
                 }

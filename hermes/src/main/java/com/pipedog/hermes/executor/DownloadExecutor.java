@@ -3,8 +3,8 @@ package com.pipedog.hermes.executor;
 import com.pipedog.hermes.executor.base.AbstractExecutor;
 import com.pipedog.hermes.request.interfaces.IDownloadSettings;
 import com.pipedog.hermes.request.Request;
-import com.pipedog.hermes.response.DownloadResponse;
-import com.pipedog.hermes.response.internal.DownloadResponseImpl;
+import com.pipedog.hermes.response.IResponse;
+import com.pipedog.hermes.response.RealResponse;
 import com.pipedog.hermes.utils.AssertHandler;
 import com.pipedog.hermes.utils.UrlUtils;
 
@@ -115,7 +115,7 @@ public class DownloadExecutor extends AbstractExecutor {
 
             executeOnCallbackThread(() -> {
                 onDownloadFailure(null,
-                        new DownloadResponseImpl(response.code(), response.message(), null));
+                        new RealResponse(response.code(), response.message(), null));
                 onResult(false, "Download failed!");
             });
             return;
@@ -163,7 +163,7 @@ public class DownloadExecutor extends AbstractExecutor {
 
             // 下载完成
             executeOnCallbackThread(() -> {
-                onDownloadSuccess(new DownloadResponseImpl(response.code(), response.message(), fullPath));
+                onDownloadSuccess(new RealResponse(response.code(), response.message(), fullPath));
                 onResult(true, "Download success!");
             });
         } catch (Exception e) {
@@ -175,7 +175,7 @@ public class DownloadExecutor extends AbstractExecutor {
 
             executeOnCallbackThread(() -> {
                 onDownloadFailure(e,
-                        new DownloadResponseImpl(1000, "Write download data to failed!", null));
+                        new RealResponse(1000, "Write download data to failed!", null));
                 onResult(false, "Write download data to failed!");
             });
         } finally {
@@ -193,20 +193,20 @@ public class DownloadExecutor extends AbstractExecutor {
     }
 
     private void onDownloadProgress(long currentLength, long totalLength) {
-        if (request.getDownloadListener() != null) {
-            request.getDownloadListener().onProgress(currentLength, totalLength);
+        if (request.getCallback() != null) {
+            request.getCallback().onProgress(currentLength, totalLength);
         }
     }
 
-    private void onDownloadFailure(Exception e, DownloadResponse response) {
-        if (request.getDownloadListener() != null) {
-            request.getDownloadListener().onFailure(e, response);
+    private void onDownloadFailure(Exception e, IResponse response) {
+        if (request.getCallback() != null) {
+            request.getCallback().onFailure(e, response);
         }
     }
 
-    private void onDownloadSuccess(DownloadResponse response) {
-        if (request.getDownloadListener() != null) {
-            request.getDownloadListener().onSuccess(response);
+    private void onDownloadSuccess(IResponse response) {
+        if (request.getCallback() != null) {
+            request.getCallback().onSuccess(response);
         }
     }
 

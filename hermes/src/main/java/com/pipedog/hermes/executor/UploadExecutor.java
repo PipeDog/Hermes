@@ -5,8 +5,8 @@ import com.pipedog.hermes.request.Request;
 import com.pipedog.hermes.enums.SerializerType;
 import com.pipedog.hermes.request.internal.HermesMultipartBody;
 import com.pipedog.hermes.request.internal.IProgressListener;
-import com.pipedog.hermes.response.UploadResponse;
-import com.pipedog.hermes.response.internal.UploadResponseImpl;
+import com.pipedog.hermes.response.IResponse;
+import com.pipedog.hermes.response.RealResponse;
 import com.pipedog.hermes.utils.AssertHandler;
 import com.pipedog.hermes.utils.JsonUtils;
 import com.pipedog.hermes.utils.UrlUtils;
@@ -166,7 +166,7 @@ public class UploadExecutor extends AbstractExecutor {
             }
 
             executeOnCallbackThread(() -> {
-                onUploadFailure(null, new UploadResponseImpl(
+                onUploadFailure(null, new RealResponse(
                         code, message, gson.fromJson(finalResponseString, Object.class)));
                 onResult(false, "Request failed");
             });
@@ -184,26 +184,26 @@ public class UploadExecutor extends AbstractExecutor {
 
         final Object finalEntity = entity;
         executeOnCallbackThread(() -> {
-            onUploadSuccess(new UploadResponseImpl(code, message, finalEntity));
+            onUploadSuccess(new RealResponse(code, message, finalEntity));
             onResult(true, "Request success");
         });
     }
 
     private void onUploadProgress(long currentLength, long totalLength) {
-        if (request.getUploadListener() != null) {
-            request.getUploadListener().onProgress(currentLength, totalLength);
+        if (request.getCallback() != null) {
+            request.getCallback().onProgress(currentLength, totalLength);
         }
     }
 
-    private void onUploadSuccess(UploadResponse response) {
-        if (request.getUploadListener() != null) {
-            request.getUploadListener().onSuccess(response);
+    private void onUploadSuccess(IResponse response) {
+        if (request.getCallback() != null) {
+            request.getCallback().onSuccess(response);
         }
     }
 
-    private void onUploadFailure(Exception e, UploadResponse response) {
-        if (request.getUploadListener() != null) {
-            request.getUploadListener().onFailure(e, response);
+    private void onUploadFailure(Exception e, IResponse response) {
+        if (request.getCallback() != null) {
+            request.getCallback().onFailure(e, response);
         }
     }
 

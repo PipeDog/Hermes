@@ -42,13 +42,13 @@ public class RequestUtils {
         if (request == null) {
             return REQUEST_MODE_NOT_DETERMINE;
         }
-        if (request.getResultListener() != null) {
+        if (request.getCallback() != null) {
             return REQUEST_MODE_GENERAL;
         }
-        if (request.getUploadListener() != null) {
+        if (request.getCallback() != null) {
             return REQUEST_MODE_UPLOAD;
         }
-        if (request.getDownloadListener() != null) {
+        if (request.getCallback() != null) {
             return REQUEST_MODE_DOWNLOAD;
         }
         return REQUEST_MODE_NOT_DETERMINE;
