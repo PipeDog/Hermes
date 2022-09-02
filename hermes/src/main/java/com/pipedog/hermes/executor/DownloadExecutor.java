@@ -49,7 +49,7 @@ public class DownloadExecutor extends AbstractExecutor {
                     return;
                 }
 
-                onDownloadFailure(e, null);
+                onRequestFailure(e, null);
                 onResult(false, e.getMessage());
             }
 
@@ -92,7 +92,7 @@ public class DownloadExecutor extends AbstractExecutor {
                 return;
             }
 
-            onDownloadFailure(null, new RealResponse(response.code(), response.message(), null));
+            onRequestFailure(null, new RealResponse(response.code(), response.message(), null));
             onResult(false, "Download failed!");
             return;
         }
@@ -125,18 +125,14 @@ public class DownloadExecutor extends AbstractExecutor {
                 currentLength += readLength;
 
                 if (throwProgress) {
-                    final long finalCurrentLength = currentLength;
-                    final long finalTotalLength = totalLength;
-
-                    // 进度更新回调
-                    onDownloadProgress(finalCurrentLength, finalTotalLength);
+                    onRequestProgress(currentLength, totalLength);
                 }
             }
 
             fileOutputStream.flush();
 
             // 下载完成
-            onDownloadSuccess(new RealResponse(response.code(), response.message(), targetPath));
+            onRequestSuccess(new RealResponse(response.code(), response.message(), targetPath));
             onResult(true, "Download success!");
         } catch (Exception e) {
             e.printStackTrace();
@@ -145,7 +141,7 @@ public class DownloadExecutor extends AbstractExecutor {
                 return;
             }
 
-            onDownloadFailure(e, new RealResponse(1000, "Write download data to failed!", null));
+            onRequestFailure(e, new RealResponse(1000, "Write download data to failed!", null));
             onResult(false, "Write download data to failed!");
         } finally {
             try {
@@ -158,25 +154,6 @@ public class DownloadExecutor extends AbstractExecutor {
             } catch (Exception e) {
                 e.printStackTrace();
             }
-        }
-    }
-
-    private void onDownloadProgress(long currentLength, long totalLength) {
-        ProgressCallback callback = (ProgressCallback) request.getCallback();
-        if (callback != null) {
-            callback.onProgress(currentLength, totalLength);
-        }
-    }
-
-    private void onDownloadFailure(Exception e, Response response) {
-        if (request.getCallback() != null) {
-            request.getCallback().onFailure(e, response);
-        }
-    }
-
-    private void onDownloadSuccess(Response response) {
-        if (request.getCallback() != null) {
-            request.getCallback().onSuccess(response);
         }
     }
 
