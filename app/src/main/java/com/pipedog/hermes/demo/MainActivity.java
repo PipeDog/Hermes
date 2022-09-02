@@ -19,8 +19,8 @@ import android.widget.TextView;
 
 import com.pipedog.hermes.cache.CacheManager;
 import com.pipedog.hermes.enums.CachePolicy;
-import com.pipedog.hermes.request.interfaces.IDownloadSettings;
-import com.pipedog.hermes.request.interfaces.IMultipartBody;
+import com.pipedog.hermes.request.interfaces.DownloadSettings;
+import com.pipedog.hermes.request.interfaces.MultipartBody;
 import com.pipedog.hermes.enums.RequestType;
 import com.pipedog.hermes.enums.SerializerType;
 import com.pipedog.hermes.request.Request;
@@ -113,103 +113,92 @@ public class MainActivity extends AppCompatActivity {
 //            }
 //        }
 
-        Request.build(new Request.BuildBlock() {
-            @Override
-            public Request onBuild(Request.Builder builder) {
-                return builder
-                        .serializerType(SerializerType.JSON)
-                        .cachePolicy(CachePolicy.RETURN_CACHE_DATA_THEN_LOAD)
-                        .lifecycle(getLifecycle())
-                        .build();
-            }
-        }).setCallback(new ResponseCallback<Map<String, Object>>() {
-            @Override
-            public void onSuccess(Response<Map<String, Object>> response) {
-                System.out.println("body" + response.body());
-            }
-
-            @Override
-            public void onFailure(@Nullable Exception e, @Nullable Response<Map<String, Object>> response) {
-
-            }
-        }).send();
     }
 
     // upload
 
+    /*
+
+        Map<String, String> headers = new HashMap<>();
+        Map<String, Object> parameters = new HashMap<>();
+
+        new Request.Builder()
+            .baseUrl("https://www.baidu.com")
+            .urlPath("/path")
+            .headers(headers)
+            .parameters(parameters)
+            .multipartBody()
+            .build()
+            .upload(new UploadCallback() {
+
+            });
+     */
+
     private void upload() {
-        Request.build(new Request.BuildBlock() {
-            @Override
-            public Request onBuild(Request.Builder builder) {
-                return builder.build();
-            }
-        }).setMultipartBody(new IMultipartBody.Builder() {
-            @Override
-            public void onBuild(IMultipartBody formData) {
+//        new Request.Builder()
+//                .multipartBody(new MultipartBody.Builder() {
+//            @Override
+//            public void onBuild(MultipartBody multipartBody) {
+//
+//            }
+//        }).callbackOnMainThread(true)
 
-            }
-        }).setCallback(new ResponseCallback<Map<?, ?>>() {
-            @Override
-            public void onSuccess(Response<Map<?, ?>> response) {
-
-            }
-
-            @Override
-            public void onFailure(@Nullable Exception e, @Nullable Response<Map<?, ?>> response) {
-
-            }
-        }).send();
     }
 
     // download
 
     private void download() {
-        Request.build(new Request.BuildBlock() {
-            @Override
-            public Request onBuild(Request.Builder builder) {
-                String imageUrl = "https://upload-images.jianshu.io/upload_images/5809200-a99419bb94924e6d.jpg?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240";
-                //                 https://upload-images.jianshu.io/upload_images/5809200-a99419bb94924e6d.jpg?imageMogr2/auto-orient/strip%257CimageView2/2/w/1240
-                imageUrl = UrlUtils.getEncodedUrl(imageUrl);
-                // https%3A%2F%2Fupload-images.jianshu.io%2Fupload_images%2F5809200-a99419bb94924e6d.jpg%3FimageMogr2%2Fauto-orient%2Fstrip%257CimageView2%2F2%2Fw%2F1240
-                System.out.println("[encode] " + imageUrl);
-                return builder.baseUrl(imageUrl).requestType(RequestType.GET).build();
-            }
-        }).setDownloadSettings(new IDownloadSettings() {
-            @Override
-            public String getDestinationFullPath() {
-                return getFullPath();
-            }
-        }).setCallback(new ResponseCallback<String>() {
-            @Override
-            public void onProgress(long currentLength, long totalLength) {
-                System.out.println("currentLength = " + currentLength + ", totalLength = " + totalLength);
+//        new Request.Builder()
+//                .baseUrl("https://upload-images.jianshu.io/upload_images/5809200-a99419bb94924e6d.jpg?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240")
+//                .build()
 
-                String progressText =
-                        (
-                                "cur = " + currentLength + ", total = " + totalLength +
-                                        ", progress = " + ((int)((currentLength * 100.0) / totalLength))
-                        );
-                Message msg = handler.obtainMessage(10, progressText);
-                handler.sendMessage(msg);
-            }
-
-            @Override
-            public void onSuccess(Response<String> response) {
-                System.out.println(response.body());
-                Message msg = handler.obtainMessage(100, response.body());
-                handler.sendMessage(msg);
-            }
-
-            @Override
-            public void onFailure(@Nullable Exception e, @Nullable Response<String> response) {
-                if (e != null) {
-                    System.out.println(e.toString());
-                }
-                if (response != null) {
-                    System.out.println(response.toString());
-                }
-            }
-        }).send();
+//
+//        Request.build(new Request.BuildBlock() {
+//            @Override
+//            public Request onBuild(Request.Builder builder) {
+//                String imageUrl = "https://upload-images.jianshu.io/upload_images/5809200-a99419bb94924e6d.jpg?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240";
+//                //                 https://upload-images.jianshu.io/upload_images/5809200-a99419bb94924e6d.jpg?imageMogr2/auto-orient/strip%257CimageView2/2/w/1240
+//                imageUrl = UrlUtils.getEncodedUrl(imageUrl);
+//                // https%3A%2F%2Fupload-images.jianshu.io%2Fupload_images%2F5809200-a99419bb94924e6d.jpg%3FimageMogr2%2Fauto-orient%2Fstrip%257CimageView2%2F2%2Fw%2F1240
+//                System.out.println("[encode] " + imageUrl);
+//                return builder.baseUrl(imageUrl).requestType(RequestType.GET).build();
+//            }
+//        }).setDownloadSettings(new DownloadSettings() {
+//            @Override
+//            public String getDestinationFullPath() {
+//                return getFullPath();
+//            }
+//        }).setCallback(new ResponseCallback<String>() {
+//            @Override
+//            public void onProgress(long currentLength, long totalLength) {
+//                System.out.println("currentLength = " + currentLength + ", totalLength = " + totalLength);
+//
+//                String progressText =
+//                        (
+//                                "cur = " + currentLength + ", total = " + totalLength +
+//                                        ", progress = " + ((int)((currentLength * 100.0) / totalLength))
+//                        );
+//                Message msg = handler.obtainMessage(10, progressText);
+//                handler.sendMessage(msg);
+//            }
+//
+//            @Override
+//            public void onSuccess(Response<String> response) {
+//                System.out.println(response.body());
+//                Message msg = handler.obtainMessage(100, response.body());
+//                handler.sendMessage(msg);
+//            }
+//
+//            @Override
+//            public void onFailure(@Nullable Exception e, @Nullable Response<String> response) {
+//                if (e != null) {
+//                    System.out.println(e.toString());
+//                }
+//                if (response != null) {
+//                    System.out.println(response.toString());
+//                }
+//            }
+//        }).send();
     }
 
     public String getFullPath() {

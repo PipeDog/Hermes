@@ -6,7 +6,7 @@ import com.pipedog.hermes.cache.ICacheStorage;
 import com.pipedog.hermes.executor.base.AbstractExecutor;
 import com.pipedog.hermes.executor.base.ExecutorFactory;
 import com.pipedog.hermes.request.Request;
-import com.pipedog.hermes.utils.AssertHandler;
+import com.pipedog.hermes.utils.AssertionHandler;
 import com.pipedog.hermes.utils.JsonUtils;
 
 import java.util.HashMap;
@@ -120,7 +120,7 @@ public class NetworkManager {
 
     private void realAddRequest(Request request) {
         if (request.getRequestID() == null) {
-            AssertHandler.handle(false, "Invalid argument `request`, check it!");
+            AssertionHandler.handle(false, "Invalid argument `request`, check it!");
             return;
         }
 

@@ -3,6 +3,9 @@ package com.pipedog.hermes.executor.base;
 import com.google.gson.Gson;
 import com.pipedog.hermes.request.Request;
 import com.pipedog.hermes.cache.ICacheStorage;
+import com.pipedog.hermes.response.ProgressCallback;
+import com.pipedog.hermes.response.Response;
+import com.pipedog.hermes.response.ResponseCallback;
 import com.pipedog.hermes.utils.ThreadUtils;
 
 import okhttp3.Call;
@@ -77,14 +80,6 @@ public abstract class AbstractExecutor {
 
     // PROTECTED METHODS
 
-    protected void executeOnCallbackThread(Runnable r) {
-        if (request.isCallbackOnMainThread()) {
-            ThreadUtils.runInMainThread(r);
-        } else {
-            r.run();
-        }
-    }
-
     /**
      * 自动重试
      * @return  true - 将要进行重试，不要给 Request 进行回调
@@ -100,9 +95,53 @@ public abstract class AbstractExecutor {
         return false;
     }
 
+    /**
+     * 回调给 NetworkManager
+     */
     protected void onResult(boolean success, String error) {
         if (executorListener != null) {
             executorListener.onResult(false, error);
+        }
+    }
+
+    /**
+     * 进度回调，回调给 Request
+     */
+    protected void onRequestProgress(long currentLength, long totalLength) {
+        ProgressCallback callback = (ProgressCallback) request.getCallback();
+        if (callback != null) {
+            executeOnCallbackThread(() -> { callback.onProgress(currentLength, totalLength); });
+        }
+    }
+
+    /**
+     * 成功回调，回调给 Request
+     */
+    protected void onRequestSuccess(Response response) {
+        ResponseCallback callback = request.getCallback();
+        if (callback != null) {
+            executeOnCallbackThread(() -> { callback.onSuccess(response); });
+        }
+    }
+
+    /**
+     * 失败回调，回调给 Request
+     */
+    protected void onRequestFailure(Exception e, Response response) {
+        ResponseCallback callback = request.getCallback();
+        if (callback != null) {
+            executeOnCallbackThread(() -> { callback.onFailure(e, response); });
+        }
+    }
+
+
+    // PRIVATE METHODS
+
+    private void executeOnCallbackThread(Runnable r) {
+        if (request.isCallbackOnMainThread()) {
+            ThreadUtils.runInMainThread(r);
+        } else {
+            r.run();
         }
     }
 

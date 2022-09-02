@@ -8,7 +8,7 @@ import java.util.logging.Logger;
  * @time 2022/05/26
  * @desc 模拟断言
  */
-public class AssertHandler {
+public class AssertionHandler {
 
     //    private static boolean mDebug = true;
     private static boolean mDebug = false;

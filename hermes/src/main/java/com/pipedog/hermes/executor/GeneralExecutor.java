@@ -8,7 +8,7 @@ import com.pipedog.hermes.enums.RequestType;
 import com.pipedog.hermes.enums.SerializerType;
 import com.pipedog.hermes.response.Response;
 import com.pipedog.hermes.response.RealResponse;
-import com.pipedog.hermes.utils.AssertHandler;
+import com.pipedog.hermes.utils.AssertionHandler;
 import com.pipedog.hermes.utils.JsonUtils;
 import com.pipedog.hermes.utils.RequestUtils;
 import com.pipedog.hermes.utils.UrlUtils;
@@ -65,10 +65,8 @@ public class GeneralExecutor extends AbstractExecutor {
                     return;
                 }
 
-                executeOnCallbackThread(() -> {
-                    onRequestFailure(e, null);
-                    onResult(false, e.getMessage());
-                });
+                onRequestFailure(e, null);
+                onResult(false, e.getMessage());
             }
 
             @Override
@@ -90,7 +88,7 @@ public class GeneralExecutor extends AbstractExecutor {
         okhttp3.Request.Builder builder = new okhttp3.Request.Builder().get().url(fullUrl);
 
         // headers
-        Map<String, String> allHeaders = request.getRequestHeaders();
+        Map<String, String> allHeaders = request.getHeaders();
         for (Map.Entry<String, String> entry : allHeaders.entrySet()) {
             builder.addHeader(entry.getKey(), entry.getValue());
         }
@@ -106,7 +104,7 @@ public class GeneralExecutor extends AbstractExecutor {
         okhttp3.Request.Builder builder = new okhttp3.Request.Builder().url(fullUrl);
 
         // headers
-        Map<String, String> allHeaders = request.getRequestHeaders();
+        Map<String, String> allHeaders = request.getHeaders();
         for (Map.Entry<String, String> entry : allHeaders.entrySet()) {
             builder.addHeader(entry.getKey(), entry.getValue());
         }
@@ -155,10 +153,8 @@ public class GeneralExecutor extends AbstractExecutor {
                 return;
             }
 
-            executeOnCallbackThread(() -> {
-                onRequestFailure(e, null);
-                onResult(false, "Request success but parse failed.");
-            });
+            onRequestFailure(e, null);
+            onResult(false, "Request success but parse failed.");
             return;
         }
 
@@ -172,11 +168,9 @@ public class GeneralExecutor extends AbstractExecutor {
                 return;
             }
 
-            executeOnCallbackThread(() -> {
-                onRequestFailure(null, new RealResponse(
-                        code, message, gson.fromJson(finalResponseString, Object.class)));
-                onResult(false, "Request failed");
-            });
+            onRequestFailure(null, new RealResponse(
+                    code, message, gson.fromJson(finalResponseString, Object.class)));
+            onResult(false, "Request failed");
             return;
         }
 
@@ -191,14 +185,11 @@ public class GeneralExecutor extends AbstractExecutor {
             entity = gson.fromJson(responseString, Object.class);
         } else {
             entity = gson.fromJson(responseString, request.getResponseClass());
-            AssertHandler.handle(entity != null, "Entity should not be null!");
+            AssertionHandler.handle(entity != null, "Entity should not be null!");
         }
 
-        final Object finalEntity = entity;
-        executeOnCallbackThread(() -> {
-            onRequestSuccess(new RealResponse(code, message, finalEntity));
-            onResult(true, "Request success");
-        });
+        onRequestSuccess(new RealResponse(code, message, entity));
+        onResult(true, "Request success");
     }
 
     private boolean callbackCacheDataIfNeeded() {
@@ -216,7 +207,7 @@ public class GeneralExecutor extends AbstractExecutor {
             entity = gson.fromJson(responseString, Object.class);
         } else {
             entity = gson.fromJson(responseString, request.getResponseClass());
-            AssertHandler.handle(entity != null, "Entity should not be null!");
+            AssertionHandler.handle(entity != null, "Entity should not be null!");
         }
 
         if (cachePolicy == CachePolicy.RETURN_CACHE_DATA_THEN_LOAD) {
@@ -239,21 +230,7 @@ public class GeneralExecutor extends AbstractExecutor {
     }
 
     private void callbackCacheData(Object body) {
-        executeOnCallbackThread(() -> {
-            onRequestSuccess(new RealResponse(HTTP_STATUS_OK, "success", body));
-        });
-    }
-
-    private void onRequestSuccess(Response response) {
-        if (request.getCallback() != null) {
-            request.getCallback().onSuccess(response);
-        }
-    }
-
-    private void onRequestFailure(Exception e, Response response) {
-        if (request.getCallback() != null) {
-            request.getCallback().onFailure(e, response);
-        }
+        onRequestSuccess(new RealResponse(HTTP_STATUS_OK, "success", body));
     }
 
 }

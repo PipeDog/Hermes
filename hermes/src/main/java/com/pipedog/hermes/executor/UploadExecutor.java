@@ -3,11 +3,10 @@ package com.pipedog.hermes.executor;
 import com.pipedog.hermes.executor.base.AbstractExecutor;
 import com.pipedog.hermes.request.Request;
 import com.pipedog.hermes.enums.SerializerType;
-import com.pipedog.hermes.request.internal.HermesMultipartBody;
-import com.pipedog.hermes.request.internal.IProgressListener;
+import com.pipedog.hermes.response.ProgressCallback;
 import com.pipedog.hermes.response.Response;
 import com.pipedog.hermes.response.RealResponse;
-import com.pipedog.hermes.utils.AssertHandler;
+import com.pipedog.hermes.utils.AssertionHandler;
 import com.pipedog.hermes.utils.JsonUtils;
 import com.pipedog.hermes.utils.UrlUtils;
 
@@ -54,10 +53,8 @@ public class UploadExecutor extends AbstractExecutor {
                     return;
                 }
 
-                executeOnCallbackThread(() -> {
-                    onUploadFailure(e, null);
-                    onResult(false, e.getMessage());
-                });
+                onRequestFailure(e, null);
+                onResult(false, e.getMessage());
             }
 
             @Override
@@ -79,7 +76,7 @@ public class UploadExecutor extends AbstractExecutor {
         okhttp3.Request.Builder builder = new okhttp3.Request.Builder().url(fullUrl);
 
         // headers
-        Map<String, String> allHeaders = request.getRequestHeaders();
+        Map<String, String> allHeaders = request.getHeaders();
         for (Map.Entry<String, String> entry : allHeaders.entrySet()) {
             builder.addHeader(entry.getKey(), entry.getValue());
         }
@@ -88,8 +85,7 @@ public class UploadExecutor extends AbstractExecutor {
         RequestBody fullBody = null;
 
         // body - file
-        HermesMultipartBody formData = request.getFormData();
-        MultipartBody.Builder bodyBuilder = formData.getBuilder();
+        MultipartBody.Builder bodyBuilder = request.getMultipartFormData().getBuilder();
 
         // body - parameters
         //  application/x-www-form-urlencoded
@@ -125,15 +121,19 @@ public class UploadExecutor extends AbstractExecutor {
             throw new RuntimeException("Invalid serializerType!");
         }
 
-        // observe upload progress
-        RequestBody progressBody = new HermesRequestBody(fullBody, new IProgressListener() {
-            @Override
-            public void onProgress(long currentLength, long totalLength) {
-                onUploadProgress(currentLength, totalLength);
-            }
-        });
+        // callback upload progress if needed
+        boolean throwProgress = (request.getCallback() instanceof ProgressCallback);
+        if (throwProgress) {
+            fullBody = new HermesRequestBody(
+                    fullBody, new HermesRequestBody.IProgressListener() {
+                @Override
+                public void onProgress(long currentLength, long totalLength) {
+                    onRequestProgress(currentLength, totalLength);
+                }
+            });
+        }
 
-        okhttp3.Request okRequest = builder.post(progressBody).build();
+        okhttp3.Request okRequest = builder.post(fullBody).build();
         return okRequest;
     }
 
@@ -147,10 +147,8 @@ public class UploadExecutor extends AbstractExecutor {
                 return;
             }
 
-            executeOnCallbackThread(() -> {
-                onUploadFailure(e, null);
-                onResult(false, "Request success but parse failed.");
-            });
+            onRequestFailure(e, null);
+            onResult(false, "Request success but parse failed.");
             return;
         }
 
@@ -164,11 +162,9 @@ public class UploadExecutor extends AbstractExecutor {
                 return;
             }
 
-            executeOnCallbackThread(() -> {
-                onUploadFailure(null, new RealResponse(
-                        code, message, gson.fromJson(finalResponseString, Object.class)));
-                onResult(false, "Request failed");
-            });
+            onRequestFailure(null, new RealResponse(
+                    code, message, gson.fromJson(finalResponseString, Object.class)));
+            onResult(false, "Request failed");
             return;
         }
 
@@ -178,32 +174,11 @@ public class UploadExecutor extends AbstractExecutor {
             entity = gson.fromJson(responseString, Object.class);
         } else {
             entity = gson.fromJson(responseString, request.getResponseClass());
-            AssertHandler.handle(entity != null, "Entity should not be null!");
+            AssertionHandler.handle(entity != null, "Entity should not be null!");
         }
 
-        final Object finalEntity = entity;
-        executeOnCallbackThread(() -> {
-            onUploadSuccess(new RealResponse(code, message, finalEntity));
-            onResult(true, "Request success");
-        });
-    }
-
-    private void onUploadProgress(long currentLength, long totalLength) {
-        if (request.getCallback() != null) {
-            request.getCallback().onProgress(currentLength, totalLength);
-        }
-    }
-
-    private void onUploadSuccess(Response response) {
-        if (request.getCallback() != null) {
-            request.getCallback().onSuccess(response);
-        }
-    }
-
-    private void onUploadFailure(Exception e, Response response) {
-        if (request.getCallback() != null) {
-            request.getCallback().onFailure(e, response);
-        }
+        onRequestSuccess(new RealResponse(code, message, entity));
+        onResult(true, "Request success");
     }
 
 
@@ -213,6 +188,10 @@ public class UploadExecutor extends AbstractExecutor {
      * 支持进度回调的 MultipartBody 封装
      */
     private static class HermesRequestBody extends RequestBody {
+
+        private interface IProgressListener {
+            void onProgress(long currentLength, long totalLength);
+        }
 
         private RequestBody requestBody;
         private IProgressListener listener;

@@ -7,13 +7,13 @@ import java.io.File;
  * @time 2022/05/24
  * @desc 数据上传的表单接口定义
  */
-public interface IMultipartBody {
+public interface MultipartBody {
 
     /**
      * FormData 构造接口
      */
     static interface Builder {
-        void onBuild(IMultipartBody multipartBody);
+        void onBuild(MultipartBody multipartBody);
     }
 
     /**
@@ -21,7 +21,7 @@ public interface IMultipartBody {
      * @param name 字段名
      * @param value 字段值
      */
-    IMultipartBody addFormData(String name, String value);
+    MultipartBody addFormData(String name, String value);
 
     /**
      * 表单数据拼接
@@ -31,7 +31,7 @@ public interface IMultipartBody {
      * @param mimeType 资源媒体类型标识，常见类型列表地址：
      *                 https://developer.mozilla.org/zh-CN/docs/Web/HTTP/Basics_of_HTTP/MIME_types/Common_types
      */
-    IMultipartBody addFormData(byte[] data, String name, String filename, String mimeType);
+    MultipartBody addFormData(byte[] data, String name, String filename, String mimeType);
 
     /**
      * 表单数据拼接
@@ -41,6 +41,6 @@ public interface IMultipartBody {
      * @param mimeType 资源媒体类型标识，常见类型列表地址：
      *                 https://developer.mozilla.org/zh-CN/docs/Web/HTTP/Basics_of_HTTP/MIME_types/Common_types
      */
-    IMultipartBody addFormData(File file, String name, String filename, String mimeType);
+    MultipartBody addFormData(File file, String name, String filename, String mimeType);
 
 }

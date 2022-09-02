@@ -1,11 +1,14 @@
 package com.pipedog.hermes.executor;
 
+import android.text.TextUtils;
+
 import com.pipedog.hermes.executor.base.AbstractExecutor;
-import com.pipedog.hermes.request.interfaces.IDownloadSettings;
+import com.pipedog.hermes.request.interfaces.DownloadSettings;
 import com.pipedog.hermes.request.Request;
+import com.pipedog.hermes.response.ProgressCallback;
 import com.pipedog.hermes.response.Response;
 import com.pipedog.hermes.response.RealResponse;
-import com.pipedog.hermes.utils.AssertHandler;
+import com.pipedog.hermes.utils.AssertionHandler;
 import com.pipedog.hermes.utils.UrlUtils;
 
 import org.jetbrains.annotations.NotNull;
@@ -46,10 +49,8 @@ public class DownloadExecutor extends AbstractExecutor {
                     return;
                 }
 
-                executeOnCallbackThread(() -> {
-                    onDownloadFailure(e, null);
-                    onResult(false, e.getMessage());
-                });
+                onDownloadFailure(e, null);
+                onResult(false, e.getMessage());
             }
 
             @Override
@@ -70,40 +71,19 @@ public class DownloadExecutor extends AbstractExecutor {
         return encodedUrl;
     }
 
-    private String getDestinationDirectoryPath() {
-        checkDownloadSettings();
+    private boolean createTargetDirectoryIfNeeded() {
+        String targetPath = request.getTargetPath();
+        if (TextUtils.isEmpty(targetPath)) {
+            AssertionHandler.handle(false, "Invalid `targetPath`.");
+            return false;
+        }
 
-        IDownloadSettings settings = request.getDownloadSettings();
-        String fullPath = settings.getDestinationFullPath();
-        File file = new File(fullPath);
+        File file = new File(targetPath);
         String directoryPath = file.getParentFile().getAbsolutePath();
 
-        if (directoryPath == null || directoryPath.length() == 0) {
-            AssertHandler.handle(false, "Can not found directoryPath for download file!");
-        }
-
-        return directoryPath;
-    }
-
-    private String getDestinationFullPath() {
-        checkDownloadSettings();
-
-        IDownloadSettings settings = request.getDownloadSettings();
-        String fullPath = settings.getDestinationFullPath();
-
-        if (fullPath == null || fullPath.length() == 0) {
-            AssertHandler.handle(false, "Can not found fullPath for download file!");
-        }
-
-        return fullPath;
-    }
-
-    private void checkDownloadSettings() {
-        IDownloadSettings settings = request.getDownloadSettings();
-        if (settings == null) {
-            // VARIABLES
-            throw new RuntimeException("The instance impl `IDownloadSettings` lost!");
-        }
+        File directoryFile = new File(directoryPath);
+        directoryFile.delete();
+        return directoryFile.mkdirs();
     }
 
     private void handleResponse(okhttp3.Response response) {
@@ -112,23 +92,17 @@ public class DownloadExecutor extends AbstractExecutor {
                 return;
             }
 
-            executeOnCallbackThread(() -> {
-                onDownloadFailure(null,
-                        new RealResponse(response.code(), response.message(), null));
-                onResult(false, "Download failed!");
-            });
+            onDownloadFailure(null, new RealResponse(response.code(), response.message(), null));
+            onResult(false, "Download failed!");
             return;
         }
 
         // 构建下载目录
-        String dirPath = getDestinationDirectoryPath();
-        File dirFile = new File(dirPath);
-        dirFile.delete();
-        dirFile.mkdirs();
+        createTargetDirectoryIfNeeded();
 
         // 构建完整文件
-        String fullPath = getDestinationFullPath();
-        File file = new File(fullPath);
+        String targetPath = request.getTargetPath();
+        File file = new File(targetPath);
 
         // 下载数据写入文件
         InputStream inputStream = null;
@@ -140,6 +114,7 @@ public class DownloadExecutor extends AbstractExecutor {
             inputStream = responseBody.byteStream();
             fileOutputStream = new FileOutputStream(file);
 
+            boolean throwProgress = (request.getCallback() instanceof ProgressCallback);
             int readLength = 0;
             long currentLength = 0;
             long totalLength = responseBody.contentLength();
@@ -149,22 +124,20 @@ public class DownloadExecutor extends AbstractExecutor {
                 fileOutputStream.write(buffer, 0, readLength);
                 currentLength += readLength;
 
-                final long finalCurrentLength = currentLength;
-                final long finalTotalLength = totalLength;
+                if (throwProgress) {
+                    final long finalCurrentLength = currentLength;
+                    final long finalTotalLength = totalLength;
 
-                // 进度更新回调
-                executeOnCallbackThread(() -> {
+                    // 进度更新回调
                     onDownloadProgress(finalCurrentLength, finalTotalLength);
-                });
+                }
             }
 
             fileOutputStream.flush();
 
             // 下载完成
-            executeOnCallbackThread(() -> {
-                onDownloadSuccess(new RealResponse(response.code(), response.message(), fullPath));
-                onResult(true, "Download success!");
-            });
+            onDownloadSuccess(new RealResponse(response.code(), response.message(), targetPath));
+            onResult(true, "Download success!");
         } catch (Exception e) {
             e.printStackTrace();
 
@@ -172,11 +145,8 @@ public class DownloadExecutor extends AbstractExecutor {
                 return;
             }
 
-            executeOnCallbackThread(() -> {
-                onDownloadFailure(e,
-                        new RealResponse(1000, "Write download data to failed!", null));
-                onResult(false, "Write download data to failed!");
-            });
+            onDownloadFailure(e, new RealResponse(1000, "Write download data to failed!", null));
+            onResult(false, "Write download data to failed!");
         } finally {
             try {
                 if (inputStream != null) {
@@ -192,8 +162,9 @@ public class DownloadExecutor extends AbstractExecutor {
     }
 
     private void onDownloadProgress(long currentLength, long totalLength) {
-        if (request.getCallback() != null) {
-            request.getCallback().onProgress(currentLength, totalLength);
+        ProgressCallback callback = (ProgressCallback) request.getCallback();
+        if (callback != null) {
+            callback.onProgress(currentLength, totalLength);
         }
     }
 

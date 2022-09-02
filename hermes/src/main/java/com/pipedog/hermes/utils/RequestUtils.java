@@ -100,8 +100,8 @@ public class RequestUtils {
             url += ("&params=" + parametersString);
         }
 
-        if (request.getRequestHeaders() != null && request.getRequestHeaders().size() > 0) {
-            TreeMap<String, String> orderedHeaders = new TreeMap<>(request.getRequestHeaders());
+        if (request.getHeaders() != null && request.getHeaders().size() > 0) {
+            TreeMap<String, String> orderedHeaders = new TreeMap<>(request.getHeaders());
             String headersString = orderedHeaders.toString();
             url += ("&headers=" + headersString);
         }

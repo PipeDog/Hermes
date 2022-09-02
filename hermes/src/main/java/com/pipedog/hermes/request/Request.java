@@ -5,9 +5,6 @@ import androidx.lifecycle.LifecycleObserver;
 import androidx.lifecycle.OnLifecycleEvent;
 
 import com.pipedog.hermes.manager.NetworkManager;
-import com.pipedog.hermes.request.interfaces.IDownloadSettings;
-import com.pipedog.hermes.request.interfaces.IMultipartBody;
-import com.pipedog.hermes.request.internal.HermesMultipartBody;
 import com.pipedog.hermes.enums.CachePolicy;
 import com.pipedog.hermes.enums.RequestType;
 import com.pipedog.hermes.enums.SerializerType;
@@ -26,85 +23,61 @@ import java.util.concurrent.atomic.AtomicBoolean;
  */
 public class Request {
 
-    private Object extra;
-    private RequestType requestType = RequestType.POST;
     private String baseUrl;
     private String urlPath;
+    private Map<String, String> headers = new HashMap<>();
     private Map<String, Object> parameters = new HashMap<>();
-    private CachePolicy cachePolicy = CachePolicy.RELOAD_IGNORE_CACHE_DATA;
-    private Map<String, String> requestHeaders = new HashMap<>();
+    private MultipartFormData multipartFormData;
+    private String targetPath;
+    private RequestType requestType = RequestType.POST;
     private SerializerType serializerType = SerializerType.HTTP;
+
+    private CachePolicy cachePolicy = CachePolicy.RELOAD_IGNORE_CACHE_DATA;
+    private Class<?> responseClass;
     private int autoRetryTimes = 1;
     private boolean callbackOnMainThread = true;
-    private Class<?> responseClass;
+    private Object extra;
 
-    private AtomicBoolean executing = new AtomicBoolean(false);
-    private String requestID;
     private ResponseCallback callback;
-    private HermesMultipartBody multipartBody;
-    private IDownloadSettings downloadSettings;
+    private WeakReference<Lifecycle> lifecycle;
     private LifecycleObserverImpl lifecycleObserver;
+    private volatile AtomicBoolean executing = new AtomicBoolean(false);
+    private String requestID;
 
 
     // CONSTRUCTORS
 
-    public static Request build(BuildBlock block) {
-        Builder builder = new Builder();
-        return block.onBuild(builder);
-    }
+    private Request(Builder builder) {
+        this.baseUrl = builder.baseUrl;
+        this.urlPath = builder.urlPath;
+        this.headers = builder.headers;
+        this.parameters = builder.parameters;
+        this.multipartFormData = builder.multipartFormData;
+        this.targetPath = builder.targetPath;
+        this.requestType = builder.requestType;
+        this.serializerType = builder.serializerType;
 
-    private Request(
-            Object extra, RequestType requestType, String baseUrl,
-            String urlPath, Map<String, Object> parameters, CachePolicy cachePolicy,
-            Map<String, String> requestHeaders, SerializerType serializerType, int autoRetryTimes,
-            boolean callbackOnMainThread, Class<?> responseClass, Lifecycle lifecycle) {
-        this.extra = extra;
-        this.requestType = requestType;
-        this.baseUrl = baseUrl;
-        this.urlPath = urlPath;
-        this.parameters = parameters;
-        this.cachePolicy = cachePolicy;
-        this.requestHeaders = requestHeaders;
-        this.serializerType = serializerType;
-        this.autoRetryTimes = autoRetryTimes;
-        this.callbackOnMainThread = callbackOnMainThread;
-        this.responseClass = responseClass;
+        this.cachePolicy = builder.cachePolicy;
+        this.responseClass = builder.responseClass;
+        this.autoRetryTimes = builder.autoRetryTimes;
+        this.callbackOnMainThread = builder.callbackOnMainThread;
+        this.extra = builder.extra;
 
-        if (lifecycle != null) {
-            this.lifecycleObserver = new LifecycleObserverImpl(this);
-            lifecycle.addObserver(this.lifecycleObserver);
+        this.lifecycle = builder.lifecycle;
+        if (this.lifecycle != null) {
+            Lifecycle realLifecycle = lifecycle.get();
+            if (realLifecycle != null) {
+                this.lifecycleObserver = new LifecycleObserverImpl(this);
+                realLifecycle.addObserver(this.lifecycleObserver);
+            }
         }
     }
 
 
     // PUBLIC METHODS
 
-    public <T> Request setCallback(ResponseCallback<T> callback) {
+    public <T> Request call(ResponseCallback<T> callback) {
         this.callback = callback;
-        return this;
-    }
-
-    /**
-     * 设置下载相关配置
-     */
-    public Request setDownloadSettings(IDownloadSettings settings) {
-        downloadSettings = settings;
-        return this;
-    }
-
-    /**
-     * 添加上传数据
-     */
-    public Request setMultipartBody(IMultipartBody.Builder builder) {
-        multipartBody = new HermesMultipartBody();
-        builder.onBuild(multipartBody);
-        return this;
-    }
-
-    /**
-     * 发送请求
-     */
-    public Request send() {
         NetworkManager.getInstance().addRequest(this);
         return this;
     }
@@ -117,19 +90,19 @@ public class Request {
     }
 
     /**
-     * 请求实例销毁
+     * 销毁请求，打破引用链
      */
     public void destory() {
         if (callback != null) {
             callback = null;
         }
-        if (multipartBody != null) {
-            multipartBody = null;
-        }
-        if (downloadSettings != null) {
-            downloadSettings = null;
-        }
         if (lifecycleObserver != null) {
+            Lifecycle realLifecycle = lifecycle.get();
+            if (realLifecycle != null) {
+                realLifecycle.removeObserver(lifecycleObserver);
+                lifecycle = null;
+            }
+
             lifecycleObserver = null;
         }
     }
@@ -144,10 +117,6 @@ public class Request {
 
     // GETTER METHODS
 
-    public RequestType getRequestType() {
-        return requestType;
-    }
-
     public String getBaseUrl() {
         return baseUrl;
     }
@@ -156,20 +125,36 @@ public class Request {
         return urlPath;
     }
 
+    public Map<String, String> getHeaders() {
+        return headers;
+    }
+
     public Map<String, Object> getParameters() {
         return parameters;
+    }
+
+    public MultipartFormData getMultipartFormData() {
+        return multipartFormData;
+    }
+
+    public String getTargetPath() {
+        return targetPath;
+    }
+
+    public RequestType getRequestType() {
+        return requestType;
+    }
+
+    public SerializerType getSerializerType() {
+        return serializerType;
     }
 
     public CachePolicy getCachePolicy() {
         return cachePolicy;
     }
 
-    public Map<String, String> getRequestHeaders() {
-        return requestHeaders;
-    }
-
-    public SerializerType getSerializerType() {
-        return serializerType;
+    public Class<?> getResponseClass() {
+        return responseClass;
     }
 
     public int getAutoRetryTimes() {
@@ -180,12 +165,12 @@ public class Request {
         return callbackOnMainThread;
     }
 
-    public Class getResponseClass() {
-        return responseClass;
-    }
-
     public Object getExtra() {
         return extra;
+    }
+
+    public ResponseCallback getCallback() {
+        return callback;
     }
 
     public boolean isExecuting() {
@@ -197,18 +182,6 @@ public class Request {
             requestID = RequestIDGenerator.getRequestID();
         }
         return requestID;
-    }
-
-    public ResponseCallback getCallback() {
-        return callback;
-    }
-
-    public HermesMultipartBody getFormData() {
-        return multipartBody;
-    }
-
-    public IDownloadSettings getDownloadSettings() {
-        return downloadSettings;
     }
 
 
@@ -229,31 +202,23 @@ public class Request {
     }
 
     public static class Builder {
-
-        private Object extra;
-        private RequestType requestType = RequestType.POST;
         private String baseUrl;
         private String urlPath;
+        private Map<String, String> headers = new HashMap<>();
         private Map<String, Object> parameters = new HashMap<>();
-        private CachePolicy cachePolicy = CachePolicy.RELOAD_IGNORE_CACHE_DATA;
-        private Map<String, String> requestHeaders = new HashMap<>();
+        private MultipartFormData multipartFormData;
+        private String targetPath;
+        private RequestType requestType = RequestType.POST;
         private SerializerType serializerType = SerializerType.HTTP;
-        private int autoRetryTimes = 1;
-        private boolean callbackOnMainThread = false;
+
+        private CachePolicy cachePolicy = CachePolicy.RELOAD_IGNORE_CACHE_DATA;
         private Class<?> responseClass;
+        private int autoRetryTimes = 1;
+        private boolean callbackOnMainThread = true;
+        private Object extra;
         private WeakReference<Lifecycle> lifecycle;
 
         public Builder() {
-        }
-
-        public Builder extra(Object extra) {
-            this.extra = extra;
-            return this;
-        }
-
-        public Builder requestType(RequestType requestType) {
-            this.requestType = requestType;
-            return this;
         }
 
         public Builder baseUrl(String baseUrl) {
@@ -266,8 +231,33 @@ public class Request {
             return this;
         }
 
+        public Builder headers(Map<String, String> headers) {
+            this.headers = headers;
+            return this;
+        }
+
         public Builder parameters(Map<String, Object> parameters) {
             this.parameters = parameters;
+            return this;
+        }
+
+        public Builder multipartFormData(MultipartFormData multipartFormData) {
+            this.multipartFormData = multipartFormData;
+            return this;
+        }
+
+        public Builder targetPath(String targetPath) {
+            this.targetPath = targetPath;
+            return this;
+        }
+
+        public Builder requestType(RequestType requestType) {
+            this.requestType = requestType;
+            return this;
+        }
+
+        public Builder serializerType(SerializerType serializerType) {
+            this.serializerType = serializerType;
             return this;
         }
 
@@ -276,13 +266,8 @@ public class Request {
             return this;
         }
 
-        public Builder requestHeaders(Map<String, String> requestHeaders) {
-            this.requestHeaders = requestHeaders;
-            return this;
-        }
-
-        public Builder serializerType(SerializerType serializerType) {
-            this.serializerType = serializerType;
+        public Builder responseClass(Class<?> responseClass) {
+            this.responseClass = responseClass;
             return this;
         }
 
@@ -296,8 +281,8 @@ public class Request {
             return this;
         }
 
-        public Builder responseClass(Class<?> responseClass) {
-            this.responseClass = responseClass;
+        public Builder extra(Object extra) {
+            this.extra = extra;
             return this;
         }
 
@@ -307,17 +292,8 @@ public class Request {
         }
 
         public Request build() {
-            return new Request(
-                    extra, requestType, baseUrl, urlPath,
-                    parameters, cachePolicy, requestHeaders, serializerType,
-                    autoRetryTimes, callbackOnMainThread, responseClass,
-                    lifecycle == null ? null : lifecycle.get());
+            return new Request(this);
         }
-
-    }
-
-    public static interface BuildBlock {
-        Request onBuild(Builder builder);
     }
 
 }
