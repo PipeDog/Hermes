@@ -24,6 +24,7 @@ import com.pipedog.hermes.request.interfaces.MultipartBody;
 import com.pipedog.hermes.enums.RequestType;
 import com.pipedog.hermes.enums.SerializerType;
 import com.pipedog.hermes.request.Request;
+import com.pipedog.hermes.response.ProgressCallback;
 import com.pipedog.hermes.response.ResponseCallback;
 import com.pipedog.hermes.response.Response;
 import com.pipedog.hermes.utils.JsonUtils;
@@ -148,57 +149,34 @@ public class MainActivity extends AppCompatActivity {
     // download
 
     private void download() {
-//        new Request.Builder()
-//                .baseUrl("https://upload-images.jianshu.io/upload_images/5809200-a99419bb94924e6d.jpg?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240")
-//                .build()
+        new Request.Builder()
+                .baseUrl("https://upload-images.jianshu.io/upload_images/5809200-a99419bb94924e6d.jpg?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240")
+                .targetPath(getFullPath())
+                .build()
+                .call(new ProgressCallback<String>() {
+                    @Override
+                    public void onProgress(long currentLength, long totalLength) {
+                        System.out.println("currentLength = " + currentLength + ", totalLength = " + totalLength);
 
-//
-//        Request.build(new Request.BuildBlock() {
-//            @Override
-//            public Request onBuild(Request.Builder builder) {
-//                String imageUrl = "https://upload-images.jianshu.io/upload_images/5809200-a99419bb94924e6d.jpg?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240";
-//                //                 https://upload-images.jianshu.io/upload_images/5809200-a99419bb94924e6d.jpg?imageMogr2/auto-orient/strip%257CimageView2/2/w/1240
-//                imageUrl = UrlUtils.getEncodedUrl(imageUrl);
-//                // https%3A%2F%2Fupload-images.jianshu.io%2Fupload_images%2F5809200-a99419bb94924e6d.jpg%3FimageMogr2%2Fauto-orient%2Fstrip%257CimageView2%2F2%2Fw%2F1240
-//                System.out.println("[encode] " + imageUrl);
-//                return builder.baseUrl(imageUrl).requestType(RequestType.GET).build();
-//            }
-//        }).setDownloadSettings(new DownloadSettings() {
-//            @Override
-//            public String getDestinationFullPath() {
-//                return getFullPath();
-//            }
-//        }).setCallback(new ResponseCallback<String>() {
-//            @Override
-//            public void onProgress(long currentLength, long totalLength) {
-//                System.out.println("currentLength = " + currentLength + ", totalLength = " + totalLength);
-//
-//                String progressText =
-//                        (
-//                                "cur = " + currentLength + ", total = " + totalLength +
-//                                        ", progress = " + ((int)((currentLength * 100.0) / totalLength))
-//                        );
-//                Message msg = handler.obtainMessage(10, progressText);
-//                handler.sendMessage(msg);
-//            }
-//
-//            @Override
-//            public void onSuccess(Response<String> response) {
-//                System.out.println(response.body());
-//                Message msg = handler.obtainMessage(100, response.body());
-//                handler.sendMessage(msg);
-//            }
-//
-//            @Override
-//            public void onFailure(@Nullable Exception e, @Nullable Response<String> response) {
-//                if (e != null) {
-//                    System.out.println(e.toString());
-//                }
-//                if (response != null) {
-//                    System.out.println(response.toString());
-//                }
-//            }
-//        }).send();
+                        String progressText = (
+                                "cur = " + currentLength + ", total = " + totalLength +
+                                        ", progress = " + ((int)((currentLength * 100.0) / totalLength)));
+                        Message msg = handler.obtainMessage(10, progressText);
+                        handler.sendMessage(msg);
+                    }
+
+                    @Override
+                    public void onSuccess(Response<String> response) {
+                        System.out.println(response.body());
+                        Message msg = handler.obtainMessage(100, response.body());
+                        handler.sendMessage(msg);
+                    }
+
+                    @Override
+                    public void onFailure(@Nullable Exception e, @Nullable Response<String> response) {
+                        e.printStackTrace();
+                    }
+                });
     }
 
     public String getFullPath() {

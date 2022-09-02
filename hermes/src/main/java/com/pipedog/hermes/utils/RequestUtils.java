@@ -16,7 +16,7 @@ import okhttp3.HttpUrl;
 public class RequestUtils {
 
     /**
-     * 类型为确定
+     * 类型未知
      */
     public static final int REQUEST_MODE_NOT_DETERMINE = -1;
 
@@ -42,14 +42,14 @@ public class RequestUtils {
         if (request == null) {
             return REQUEST_MODE_NOT_DETERMINE;
         }
-        if (request.getCallback() != null) {
-            return REQUEST_MODE_GENERAL;
-        }
-        if (request.getCallback() != null) {
+        if (request.getMultipartFormData() != null) {
             return REQUEST_MODE_UPLOAD;
         }
-        if (request.getCallback() != null) {
+        if (request.getTargetPath() != null) {
             return REQUEST_MODE_DOWNLOAD;
+        }
+        if (request.getCallback() != null) {
+            return REQUEST_MODE_GENERAL;
         }
         return REQUEST_MODE_NOT_DETERMINE;
     }
