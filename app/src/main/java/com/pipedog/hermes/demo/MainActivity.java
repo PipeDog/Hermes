@@ -48,6 +48,9 @@ import java.util.Map;
 //https://upload-images.jianshu.io/upload_images/5809200-03bbbd715c24750e.jpg?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240
 
 
+// 数据测试地址：
+// https://blog.51cto.com/111wwww/2797573
+
 public class MainActivity extends AppCompatActivity {
 
     private TextView tvDownloadProgress;
