@@ -88,7 +88,7 @@ public abstract class AbstractExecutor {
     protected boolean autoRetryIfNeeded() {
         if (currentRetryTimes < request.getAutoRetryTimes()) {
             currentRetryTimes ++;
-            okCall.enqueue(okCallback);
+            execute();
             return true;
         }
 

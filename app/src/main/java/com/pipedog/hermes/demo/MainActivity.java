@@ -81,8 +81,8 @@ public class MainActivity extends AppCompatActivity {
         toJsonString(map);
         toString(map);
 
-//        jsonRequest();
-        download();
+        jsonRequest();
+//        download();
     }
 
 
@@ -102,18 +102,30 @@ public class MainActivity extends AppCompatActivity {
     // json
 
     private void jsonRequest() {
-//        new ResponseCallback<String>() {
-//            @Override
-//            public void onSuccess(IResponse<String> response) {
-//
-//            }
-//
-//            @Override
-//            public void onFailure(@Nullable Exception e, @Nullable IResponse<String> response) {
-//                response.getBody()
-//            }
-//        }
+        // http://www.kuaidi100.com/query?type=快递公司代号&postid=快递单号
+        Map<String, Object> parameters = new HashMap<>();
+        parameters.put("type", "快递公司代号");
+        parameters.put("postid", "快递单号");
 
+        new Request.Builder()
+                .baseUrl("https://www.kuaidi100.com/query")
+                .parameters(parameters)
+                .requestType(RequestType.GET)
+                .serializerType(SerializerType.JSON)
+                .cachePolicy(CachePolicy.RETURN_CACHE_DATA_THEN_LOAD)
+                .lifecycle(getLifecycle())
+                .build()
+                .call(new ResponseCallback<Map<String, Object>>() {
+                    @Override
+                    public void onSuccess(Response<Map<String, Object>> response) {
+                        System.out.println("result >>> " + response.body());
+                    }
+
+                    @Override
+                    public void onFailure(@Nullable Exception e, @Nullable Response<Map<String, Object>> response) {
+
+                    }
+                });
     }
 
     // upload

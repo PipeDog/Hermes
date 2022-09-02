@@ -25,17 +25,17 @@ public class Request {
 
     private String baseUrl;
     private String urlPath;
-    private Map<String, String> headers = new HashMap<>();
-    private Map<String, Object> parameters = new HashMap<>();
+    private Map<String, String> headers;
+    private Map<String, Object> parameters;
     private MultipartFormData multipartFormData;
     private String targetPath;
-    private RequestType requestType = RequestType.POST;
-    private SerializerType serializerType = SerializerType.HTTP;
+    private RequestType requestType;
+    private SerializerType serializerType;
 
-    private CachePolicy cachePolicy = CachePolicy.RELOAD_IGNORE_CACHE_DATA;
+    private CachePolicy cachePolicy;
     private Class<?> responseClass;
-    private int autoRetryTimes = 1;
-    private boolean callbackOnMainThread = true;
+    private int autoRetryTimes;
+    private boolean callbackOnMainThread;
     private Object extra;
 
     private ResponseCallback callback;

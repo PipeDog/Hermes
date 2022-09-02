@@ -1,5 +1,7 @@
 package com.pipedog.hermes.utils;
 
+import android.text.TextUtils;
+
 import com.pipedog.hermes.log.Logger;
 import com.pipedog.hermes.request.Request;
 
@@ -58,7 +60,9 @@ public class RequestUtils {
      * 获取 Request 的完整 url
      */
     public static String getFullUrl(Request request) {
-        String url = request.getBaseUrl() + request.getUrlPath();
+        String url =
+                (TextUtils.isEmpty(request.getBaseUrl()) ? "" : request.getBaseUrl()) +
+                (TextUtils.isEmpty(request.getUrlPath()) ? "" : request.getUrlPath());
         Map<String, Object> parameters = request.getParameters();
         return getFullUrl(url, parameters);
     }
