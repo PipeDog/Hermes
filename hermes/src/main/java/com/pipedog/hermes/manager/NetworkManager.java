@@ -23,40 +23,67 @@ import okhttp3.OkHttpClient;
  */
 public class NetworkManager {
 
-    private ICacheStorage cacheStorage;
-    private Gson gson;
-    private ExecutorFactory executorFactory;
-    private OkHttpClient okHttpClient;
-    private Map<String, Request> requestTable;
-    private Map<String, AbstractExecutor> executorTable;
-    /**
-     * 因为 okhttp 拥有自己的线程管理，这里无需过多干涉 Request 的任务分配，因此这里
-     * 仅采用了单线程线程池，来保证 requestTable 以及 executorTable 的线程安全问题
-     */
-    private ExecutorService serialExecutorService;
+    public static class Builder {
+        private ICacheStorage cacheStorage = new CacheManager(null);
+        private Gson gson = JsonUtils.getGson();
+        private OkHttpClient httpClient = new OkHttpClient();
 
-    private volatile static NetworkManager sInstance;
+        public Builder() {
+        }
+
+        public Builder cacheStorage(ICacheStorage cacheStorage) {
+            this.cacheStorage = cacheStorage;
+            return this;
+        }
+
+        public Builder gson(Gson gson) {
+            this.gson = gson;
+            return this;
+        }
+
+        public Builder httpClient(OkHttpClient httpClient) {
+            this.httpClient = httpClient;
+            return this;
+        }
+
+        public NetworkManager build() {
+            return new NetworkManager(this);
+        }
+    }
+
+    private static NetworkManager sInstance;
+
+    public static void init(NetworkManager networkManager) {
+        sInstance = networkManager;
+    }
 
     public static NetworkManager getInstance() {
         if (sInstance == null) {
-            synchronized (NetworkManager.class) {
-                if (sInstance == null) {
-                    sInstance = new NetworkManager();
-                }
-            }
+            throw new IllegalArgumentException("null sInstance, call NetworkManager::init() first!");
         }
         return sInstance;
     }
 
-    private NetworkManager() {
-        this.gson = JsonUtils.getGson();
-        this.cacheStorage = new CacheManager(null);
-        this.executorFactory = new ExecutorFactory();
-        this.okHttpClient = new OkHttpClient();
-        this.requestTable = new HashMap<>();
-        this.executorTable = new HashMap<>();
-        this.serialExecutorService = Executors.newSingleThreadExecutor();
+
+    private ICacheStorage cacheStorage;
+    private Gson gson;
+    private OkHttpClient httpClient;
+
+    private ExecutorFactory executorFactory = new ExecutorFactory();
+    private Map<String, Request> requestTable = new HashMap<>();
+    private Map<String, AbstractExecutor> executorTable = new HashMap<>();;
+    // 因为 okhttp 拥有自己的线程管理，这里无需过多干涉 Request 的任务分配，因此这里
+    // 仅采用了单线程线程池，来保证 requestTable 以及 executorTable 的线程安全问题
+    private ExecutorService serialExecutorService = Executors.newSingleThreadExecutor();
+
+    private NetworkManager(Builder builder) {
+        this.cacheStorage = builder.cacheStorage;
+        this.gson = builder.gson;
+        this.httpClient = builder.httpClient;
     }
+
+
+    // PUBLIC METHODS
 
     public void addRequest(Request request) {
         serialExecutorService.execute(new Runnable() {
@@ -103,18 +130,6 @@ public class NetworkManager {
         }
     }
 
-    public void setOkHttpClient(OkHttpClient okHttpClient) {
-        this.okHttpClient = okHttpClient;
-    }
-
-    public void setCacheStorage(ICacheStorage cacheStorage) {
-        this.cacheStorage = cacheStorage;
-    }
-
-    public void setGson(Gson gson) {
-        this.gson = gson;
-    }
-
 
     // PRIVATE METHODS
 
@@ -129,7 +144,7 @@ public class NetworkManager {
             executor.cancel();
         }
 
-        executor = executorFactory.getExecutor(okHttpClient, request);
+        executor = executorFactory.getExecutor(httpClient, request);
         if (executor == null) {
             return;
         }

@@ -76,6 +76,9 @@ public class Request {
 
     // PUBLIC METHODS
 
+    /**
+     * 发送请求
+     */
     public <T> Request call(Callback<T> callback) {
         this.callback = callback;
         NetworkManager.getInstance().addRequest(this);
@@ -87,24 +90,6 @@ public class Request {
      */
     public void cancel() {
         NetworkManager.getInstance().cancelRequest(this);
-    }
-
-    /**
-     * 销毁请求，打破引用链
-     */
-    public void destory() {
-        if (callback != null) {
-            callback = null;
-        }
-        if (lifecycleObserver != null) {
-            Lifecycle realLifecycle = lifecycle.get();
-            if (realLifecycle != null) {
-                realLifecycle.removeObserver(lifecycleObserver);
-                lifecycle = null;
-            }
-
-            lifecycleObserver = null;
-        }
     }
 
 
@@ -197,7 +182,9 @@ public class Request {
         @OnLifecycleEvent(Lifecycle.Event.ON_DESTROY)
         public void onDestory() {
             Request request = weakReference.get();
-            if (request != null) { request.destory(); }
+            if (request != null) {
+                request.cancel();
+            }
         }
     }
 

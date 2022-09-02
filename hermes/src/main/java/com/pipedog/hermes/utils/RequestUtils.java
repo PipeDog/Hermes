@@ -53,6 +53,9 @@ public class RequestUtils {
         if (request.getCallback() != null) {
             return REQUEST_MODE_GENERAL;
         }
+
+        AssertionHandler.handle(false,
+                "Check properties for request, can not match request mode.");
         return REQUEST_MODE_NOT_DETERMINE;
     }
 
