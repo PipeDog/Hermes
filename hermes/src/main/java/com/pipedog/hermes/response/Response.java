@@ -1,5 +1,10 @@
 package com.pipedog.hermes.response;
 
+/**
+ * @author liang
+ * @time 2022/09/02
+ * @desc 响应数据接口定义
+ */
 public interface Response<T> {
     /**
      * HTTP 状态码

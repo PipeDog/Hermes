@@ -3,11 +3,9 @@ package com.pipedog.hermes.executor;
 import android.text.TextUtils;
 
 import com.pipedog.hermes.executor.base.AbstractExecutor;
-import com.pipedog.hermes.request.interfaces.DownloadSettings;
 import com.pipedog.hermes.request.Request;
 import com.pipedog.hermes.response.ProgressCallback;
-import com.pipedog.hermes.response.Response;
-import com.pipedog.hermes.response.RealResponse;
+import com.pipedog.hermes.response.internal.RealResponse;
 import com.pipedog.hermes.utils.AssertionHandler;
 import com.pipedog.hermes.utils.UrlUtils;
 

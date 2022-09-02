@@ -8,7 +8,7 @@ import com.pipedog.hermes.manager.NetworkManager;
 import com.pipedog.hermes.enums.CachePolicy;
 import com.pipedog.hermes.enums.RequestType;
 import com.pipedog.hermes.enums.SerializerType;
-import com.pipedog.hermes.response.ResponseCallback;
+import com.pipedog.hermes.response.Callback;
 import com.pipedog.hermes.utils.RequestIDGenerator;
 
 import java.lang.ref.WeakReference;
@@ -38,7 +38,7 @@ public class Request {
     private boolean callbackOnMainThread;
     private Object extra;
 
-    private ResponseCallback callback;
+    private Callback callback;
     private WeakReference<Lifecycle> lifecycle;
     private LifecycleObserverImpl lifecycleObserver;
     private volatile AtomicBoolean executing = new AtomicBoolean(false);
@@ -76,7 +76,7 @@ public class Request {
 
     // PUBLIC METHODS
 
-    public <T> Request call(ResponseCallback<T> callback) {
+    public <T> Request call(Callback<T> callback) {
         this.callback = callback;
         NetworkManager.getInstance().addRequest(this);
         return this;
@@ -169,7 +169,7 @@ public class Request {
         return extra;
     }
 
-    public ResponseCallback getCallback() {
+    public Callback getCallback() {
         return callback;
     }
 

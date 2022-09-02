@@ -19,16 +19,13 @@ import android.widget.TextView;
 
 import com.pipedog.hermes.cache.CacheManager;
 import com.pipedog.hermes.enums.CachePolicy;
-import com.pipedog.hermes.request.interfaces.DownloadSettings;
-import com.pipedog.hermes.request.interfaces.MultipartBody;
 import com.pipedog.hermes.enums.RequestType;
 import com.pipedog.hermes.enums.SerializerType;
 import com.pipedog.hermes.request.Request;
 import com.pipedog.hermes.response.ProgressCallback;
-import com.pipedog.hermes.response.ResponseCallback;
+import com.pipedog.hermes.response.Callback;
 import com.pipedog.hermes.response.Response;
 import com.pipedog.hermes.utils.JsonUtils;
-import com.pipedog.hermes.utils.UrlUtils;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -99,36 +96,32 @@ public class MainActivity extends AppCompatActivity {
         System.out.println("string => " + string);
     }
 
-
-    // json
-
-    // json
-
     private void jsonRequest() {
         // http://www.kuaidi100.com/query?type=快递公司代号&postid=快递单号
         Map<String, Object> parameters = new HashMap<>();
         parameters.put("type", "快递公司代号");
         parameters.put("postid", "快递单号");
 
-        new Request.Builder()
+        Request request = new Request.Builder()
                 .baseUrl("https://www.kuaidi100.com/query")
                 .parameters(parameters)
                 .requestType(RequestType.GET)
                 .serializerType(SerializerType.JSON)
                 .cachePolicy(CachePolicy.RETURN_CACHE_DATA_THEN_LOAD)
                 .lifecycle(getLifecycle())
-                .build()
-                .call(new ResponseCallback<Map<String, Object>>() {
-                    @Override
-                    public void onSuccess(Response<Map<String, Object>> response) {
-                        System.out.println("result >>> " + response.body());
-                    }
+                .build();
 
-                    @Override
-                    public void onFailure(@Nullable Exception e, @Nullable Response<Map<String, Object>> response) {
+        request.call(new Callback<Map<String, Object>>() {
+            @Override
+            public void onSuccess(Response<Map<String, Object>> response) {
+                System.out.println("result >>> " + response.body());
+            }
 
-                    }
-                });
+            @Override
+            public void onFailure(@Nullable Exception e, @Nullable Response<Map<String, Object>> response) {
+
+            }
+        });
     }
 
     // upload

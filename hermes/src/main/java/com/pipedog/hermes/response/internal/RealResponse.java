@@ -1,5 +1,12 @@
-package com.pipedog.hermes.response;
+package com.pipedog.hermes.response.internal;
 
+import com.pipedog.hermes.response.Response;
+
+/**
+ * @author liang
+ * @time 2022/09/02
+ * @desc 响应数据实体类
+ */
 public class RealResponse<T> implements Response<T> {
 
     /**

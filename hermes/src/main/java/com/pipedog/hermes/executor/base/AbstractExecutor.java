@@ -5,11 +5,10 @@ import com.pipedog.hermes.request.Request;
 import com.pipedog.hermes.cache.ICacheStorage;
 import com.pipedog.hermes.response.ProgressCallback;
 import com.pipedog.hermes.response.Response;
-import com.pipedog.hermes.response.ResponseCallback;
+import com.pipedog.hermes.response.Callback;
 import com.pipedog.hermes.utils.ThreadUtils;
 
 import okhttp3.Call;
-import okhttp3.Callback;
 import okhttp3.OkHttpClient;
 
 /**
@@ -30,7 +29,7 @@ public abstract class AbstractExecutor {
     protected Request request;
     protected OkHttpClient okHttpClient;
     protected Call okCall;
-    protected Callback okCallback;
+    protected okhttp3.Callback okCallback;
     protected Gson gson;
     protected ICacheStorage cacheStorage;
     protected ExecutorListener executorListener;
@@ -118,7 +117,7 @@ public abstract class AbstractExecutor {
      * 成功回调，回调给 Request
      */
     protected void onRequestSuccess(Response response) {
-        ResponseCallback callback = request.getCallback();
+        Callback callback = request.getCallback();
         if (callback != null) {
             executeOnCallbackThread(() -> { callback.onSuccess(response); });
         }
@@ -128,7 +127,7 @@ public abstract class AbstractExecutor {
      * 失败回调，回调给 Request
      */
     protected void onRequestFailure(Exception e, Response response) {
-        ResponseCallback callback = request.getCallback();
+        Callback callback = request.getCallback();
         if (callback != null) {
             executeOnCallbackThread(() -> { callback.onFailure(e, response); });
         }

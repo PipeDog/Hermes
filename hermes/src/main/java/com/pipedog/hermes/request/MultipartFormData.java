@@ -8,6 +8,11 @@ import okhttp3.MediaType;
 import okhttp3.MultipartBody;
 import okhttp3.RequestBody;
 
+/**
+ * @author liang
+ * @time 2022/09/02
+ * @desc request body 包装
+ */
 public class MultipartFormData {
 
     private final MultipartBody.Builder builder

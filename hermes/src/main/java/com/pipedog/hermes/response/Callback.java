@@ -2,7 +2,12 @@ package com.pipedog.hermes.response;
 
 import androidx.annotation.Nullable;
 
-public interface ResponseCallback<T> {
+/**
+ * @author liang
+ * @time 2022/09/02
+ * @desc 请求结果回调
+ */
+public interface Callback<T> {
 
     /**
      * 请求成功回调
