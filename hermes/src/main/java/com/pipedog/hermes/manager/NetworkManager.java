@@ -134,7 +134,7 @@ public class NetworkManager {
     // PRIVATE METHODS
 
     private void realAddRequest(Request request) {
-        if (request.getRequestID() == null) {
+        if (request == null || request.getRequestID() == null) {
             AssertionHandler.handle(false, "Invalid argument `request`, check it!");
             return;
         }
@@ -173,12 +173,16 @@ public class NetworkManager {
     }
 
     private void realCancelRequest(Request request) {
-        AbstractExecutor executor = executorTable.get(request.getRequestID());
-        requestTable.remove(request.getRequestID());
-        executorTable.remove(request.getRequestID());
-        executor.cancel();
+        if (request == null || request.getRequestID() == null) {
+            return;
+        }
 
-        request.setExecuting(false);
+        AbstractExecutor executor = executorTable.get(request.getRequestID());
+        if (!executor.isExecuted() || executor.isCanceled()) {
+            return;
+        }
+
+        executor.cancel();
     }
 
 }
