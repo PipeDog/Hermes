@@ -157,7 +157,6 @@ public class GeneralExecutor extends AbstractExecutor {
             return;
         }
 
-        final String finalResponseString = responseString;
         int code = response.code();
         String message = response.message();
 
@@ -168,7 +167,7 @@ public class GeneralExecutor extends AbstractExecutor {
             }
 
             onRequestFailure(null, new RealResponse(
-                    code, message, gson.fromJson(finalResponseString, Object.class)));
+                    code, message, gson.fromJson(responseString, Object.class)));
             onResult(false, "Request failed");
             return;
         }

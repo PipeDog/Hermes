@@ -87,7 +87,7 @@ public class MainActivity extends AppCompatActivity {
         NetworkManager.init(globalManager);
 
         jsonRequest();
-//        download();
+        download();
     }
 
 
