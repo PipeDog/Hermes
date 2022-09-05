@@ -189,8 +189,8 @@ public class Request {
     }
 
     public static class Builder {
-        private String baseUrl;
-        private String urlPath;
+        private String baseUrl = "";
+        private String urlPath = "";
         private Map<String, String> headers = new HashMap<>();
         private Map<String, Object> parameters = new HashMap<>();
         private MultipartFormData multipartFormData;
