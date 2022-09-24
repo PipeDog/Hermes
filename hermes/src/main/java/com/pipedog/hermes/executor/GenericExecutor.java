@@ -29,9 +29,9 @@ import okhttp3.ResponseBody;
  * @time 2022/05/30
  * @desc 普通拉取 json 数据的执行器
  */
-public class GeneralExecutor extends AbstractExecutor {
+public class GenericExecutor extends AbstractExecutor {
 
-    public GeneralExecutor(OkHttpClient okHttpClient, Request request) {
+    public GenericExecutor(OkHttpClient okHttpClient, Request request) {
         super(okHttpClient, request);
     }
 

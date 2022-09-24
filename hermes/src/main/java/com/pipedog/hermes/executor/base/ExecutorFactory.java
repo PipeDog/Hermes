@@ -1,7 +1,7 @@
 package com.pipedog.hermes.executor.base;
 
 import com.pipedog.hermes.executor.DownloadExecutor;
-import com.pipedog.hermes.executor.GeneralExecutor;
+import com.pipedog.hermes.executor.GenericExecutor;
 import com.pipedog.hermes.executor.UploadExecutor;
 import com.pipedog.hermes.request.Request;
 import com.pipedog.hermes.utils.RequestUtils;
@@ -23,7 +23,7 @@ public class ExecutorFactory {
         int requestMode = RequestUtils.getRequestMode(request);
 
         if (requestMode == RequestUtils.REQUEST_MODE_GENERAL) {
-            return new GeneralExecutor(okHttpClient, request);
+            return new GenericExecutor(okHttpClient, request);
         }
         if (requestMode == RequestUtils.REQUEST_MODE_UPLOAD) {
             return new UploadExecutor(okHttpClient, request);
