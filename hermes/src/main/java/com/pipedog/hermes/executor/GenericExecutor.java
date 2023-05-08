@@ -174,7 +174,7 @@ public class GenericExecutor extends AbstractExecutor {
 
         // statusCode == 200, success
         String cacheId = RequestUtils.getCacheID(request);
-        if (!cacheStorage.saveCache(cacheId, responseString)) {
+        if (!cacheStorage.save(cacheId, responseString)) {
             Logger.error("Save cache failed, cacheId = %s.", cacheId);
         }
 
@@ -199,7 +199,7 @@ public class GenericExecutor extends AbstractExecutor {
             return continueRequesting;
         }
 
-        String responseString = cacheStorage.getCache(cacheId);
+        String responseString = cacheStorage.get(cacheId);
         Object entity = null;
         if (request.getResponseClass() == null) {
             entity = gson.fromJson(responseString, Object.class);

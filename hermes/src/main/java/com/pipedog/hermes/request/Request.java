@@ -4,7 +4,7 @@ import androidx.lifecycle.Lifecycle;
 import androidx.lifecycle.LifecycleObserver;
 import androidx.lifecycle.OnLifecycleEvent;
 
-import com.pipedog.hermes.manager.NetworkManager;
+import com.pipedog.hermes.manager.Hermes;
 import com.pipedog.hermes.enums.CachePolicy;
 import com.pipedog.hermes.enums.RequestType;
 import com.pipedog.hermes.enums.SerializerType;
@@ -81,7 +81,7 @@ public class Request {
      */
     public <T> Request call(Callback<T> callback) {
         this.callback = callback;
-        NetworkManager.getInstance().addRequest(this);
+        Hermes.getInstance().addRequest(this);
         return this;
     }
 
@@ -89,7 +89,7 @@ public class Request {
      * 取消请求
      */
     public void cancel() {
-        NetworkManager.getInstance().cancelRequest(this);
+        Hermes.getInstance().cancelRequest(this);
     }
 
 

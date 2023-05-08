@@ -21,7 +21,7 @@ import com.pipedog.hermes.cache.CacheManager;
 import com.pipedog.hermes.enums.CachePolicy;
 import com.pipedog.hermes.enums.RequestType;
 import com.pipedog.hermes.enums.SerializerType;
-import com.pipedog.hermes.manager.NetworkManager;
+import com.pipedog.hermes.manager.Hermes;
 import com.pipedog.hermes.request.Request;
 import com.pipedog.hermes.response.ProgressCallback;
 import com.pipedog.hermes.response.Callback;
@@ -59,8 +59,6 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        CacheManager.init(this.getApplicationContext());
-
         tvDownloadProgress = findViewById(R.id.tv_download_progress);
         ivDownload = findViewById(R.id.iv_download);
 
@@ -83,8 +81,7 @@ public class MainActivity extends AppCompatActivity {
         toString(map);
 
         // init then register global networkManager instance.
-        NetworkManager globalManager = new NetworkManager.Builder().build();
-        NetworkManager.init(globalManager);
+        new Hermes.Registry(this).register();
 
         jsonRequest();
         download();

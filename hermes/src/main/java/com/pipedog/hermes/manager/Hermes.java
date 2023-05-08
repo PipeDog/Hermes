@@ -1,5 +1,7 @@
 package com.pipedog.hermes.manager;
 
+import android.content.Context;
+
 import com.google.gson.Gson;
 import com.pipedog.hermes.cache.CacheManager;
 import com.pipedog.hermes.cache.ICacheStorage;
@@ -21,43 +23,40 @@ import okhttp3.OkHttpClient;
  * @time 2022/05/24
  * @desc 网络管理器
  */
-public class NetworkManager {
+public class Hermes {
 
-    public static class Builder {
-        private ICacheStorage cacheStorage = new CacheManager(null);
+    public static class Registry {
+        private ICacheStorage cacheStorage;
         private Gson gson = JsonUtils.getGson();
         private OkHttpClient httpClient = new OkHttpClient();
 
-        public Builder() {
+        public Registry(Context context) {
+            this.cacheStorage = new CacheManager(context, null);
         }
 
-        public Builder cacheStorage(ICacheStorage cacheStorage) {
+        public Registry cacheStorage(ICacheStorage cacheStorage) {
             this.cacheStorage = cacheStorage;
             return this;
         }
 
-        public Builder gson(Gson gson) {
+        public Registry gson(Gson gson) {
             this.gson = gson;
             return this;
         }
 
-        public Builder httpClient(OkHttpClient httpClient) {
+        public Registry httpClient(OkHttpClient httpClient) {
             this.httpClient = httpClient;
             return this;
         }
 
-        public NetworkManager build() {
-            return new NetworkManager(this);
+        public void register() {
+            sInstance = new Hermes(this);
         }
     }
 
-    private static NetworkManager sInstance;
+    private static Hermes sInstance;
 
-    public static void init(NetworkManager networkManager) {
-        sInstance = networkManager;
-    }
-
-    public static NetworkManager getInstance() {
+    public static Hermes getInstance() {
         if (sInstance == null) {
             throw new IllegalArgumentException("null sInstance, call NetworkManager::init() first!");
         }
@@ -76,7 +75,7 @@ public class NetworkManager {
     // 仅采用了单线程线程池，来保证 requestTable 以及 executorTable 的线程安全问题
     private ExecutorService serialExecutorService = Executors.newSingleThreadExecutor();
 
-    private NetworkManager(Builder builder) {
+    private Hermes(Registry builder) {
         this.cacheStorage = builder.cacheStorage;
         this.gson = builder.gson;
         this.httpClient = builder.httpClient;

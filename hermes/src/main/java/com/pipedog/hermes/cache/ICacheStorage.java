@@ -16,7 +16,7 @@ public interface ICacheStorage {
      * @param listener
      * @param <T>
      */
-    <T extends Serializable> void saveCache(String key, T value, ICacheListener listener);
+    <T extends Serializable> void save(String key, T value, ICacheListener listener);
 
     /**
      * 保存缓存
@@ -24,7 +24,7 @@ public interface ICacheStorage {
      * @param value     Serializable
      * @return true 成功 false 失败
      */
-    <T extends Serializable> boolean saveCache(String key, T value);
+    <T extends Serializable> boolean save(String key, T value);
 
     /**
      * 获取缓存
@@ -32,7 +32,7 @@ public interface ICacheStorage {
      * @param listener
      * @return
      */
-    void getCache(String key, ICacheListener listener);
+    void get(String key, ICacheListener listener);
 
     /**
      * 获取缓存
@@ -40,13 +40,13 @@ public interface ICacheStorage {
      * @param <T>   Serializable对象
      * @return
      */
-    <T extends Serializable> T getCache(String key);
+    <T extends Serializable> T get(String key);
 
     /**
      * 删除缓存
      * @param key
      */
-    void deleteCache(String key);
+    void delete(String key);
 
     /**
      * 清空所有缓存

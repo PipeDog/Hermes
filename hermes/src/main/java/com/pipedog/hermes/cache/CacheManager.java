@@ -14,42 +14,34 @@ import com.pipedog.hermes.cache.engine.ICacheEngine;
  */
 public class CacheManager implements ICacheStorage {
 
-    private static Context sContext;
     private ICacheEngine mCacheEngine;
 
-    public static void init(Context context) {
-        sContext = context.getApplicationContext();
-    }
-
-    public CacheManager(String cacheDirPath) {
-        if (sContext == null) {
-            throw new RuntimeException("Call init(Context) first!");
-        }
-        mCacheEngine = new CacheEngine(sContext, cacheDirPath);
+    public CacheManager(Context context, String cacheDirPath) {
+        mCacheEngine = new CacheEngine(context.getApplicationContext(), cacheDirPath);
     }
 
     @Override
-    public <T extends Serializable> void saveCache(String key, T value, ICacheListener listener) {
+    public <T extends Serializable> void save(String key, T value, ICacheListener listener) {
         mCacheEngine.saveCache(key,value, listener);
     }
 
     @Override
-    public <T extends Serializable> boolean saveCache(String key, T value) {
+    public <T extends Serializable> boolean save(String key, T value) {
         return mCacheEngine.saveCache(key, value);
     }
 
     @Override
-    public void getCache(String key, ICacheListener listener) {
+    public void get(String key, ICacheListener listener) {
         mCacheEngine.getCache(key, listener);
     }
 
     @Override
-    public <T extends Serializable> T getCache(String key) {
+    public <T extends Serializable> T get(String key) {
         return mCacheEngine.getCache(key);
     }
 
     @Override
-    public void deleteCache(String key) {
+    public void delete(String key) {
         mCacheEngine.deleteCache(key);
     }
 

@@ -55,7 +55,7 @@ public class DiskCache implements IDiskCache {
 
     @Override
     public void deleteCache(String key) {
-        putSerializableToLocal(key, (Serializable) new Object());
+        putSerializableToLocal(key, (Serializable) new Null());
     }
 
     @Override
@@ -116,17 +116,20 @@ public class DiskCache implements IDiskCache {
     private <T> T getSerializableFromLocal(String key) {
         T object = null;
         ObjectInputStream ois = null;
+
         InputStream in = getCacheInputStream(key);
         if (in == null) {
             return null;
         }
+
         try {
             ois = new ObjectInputStream(in);
             object = (T) ois.readObject();
         } catch (Exception e) {
             e.printStackTrace();
         }
-        return object;
+
+        return object instanceof Null ? null : object;
     }
 
     /**
@@ -184,6 +187,14 @@ public class DiskCache implements IDiskCache {
             e.printStackTrace();
         }
         return 1;
+    }
+
+    /**
+     * 空对象处理（不能直接使用 Object，因为要实现 Serializable 接口）
+     */
+    private static class Null implements Serializable {
+        public Null() {
+        }
     }
 
 }
