@@ -87,12 +87,12 @@ public class DiskCache implements IDiskCache {
             oos.flush();
             editor.commit();
             result = true;
-        } catch (IOException e) {
+        } catch (Exception e) {
             e.printStackTrace();
             try {
                 if (editor != null)
                     editor.abort();
-            } catch (IOException e1) {
+            } catch (Exception e1) {
                 e1.printStackTrace();
             }
         } finally {
@@ -100,7 +100,7 @@ public class DiskCache implements IDiskCache {
                 if (oos != null) {
                     oos.close();
                 }
-            } catch (IOException e) {
+            } catch (Exception e) {
                 e.printStackTrace();
             }
         }
@@ -123,7 +123,7 @@ public class DiskCache implements IDiskCache {
         try {
             ois = new ObjectInputStream(in);
             object = (T) ois.readObject();
-        } catch (IOException | ClassNotFoundException e) {
+        } catch (Exception e) {
             e.printStackTrace();
         }
         return object;
@@ -165,7 +165,7 @@ public class DiskCache implements IDiskCache {
         if (mDiskLruCache != null) {
             try {
                 mSnapshot = mDiskLruCache.get(key);
-            } catch (IOException e) {
+            } catch (Exception e) {
                 e.printStackTrace();
             }
         }
@@ -180,7 +180,7 @@ public class DiskCache implements IDiskCache {
         try {
             PackageInfo info = context.getPackageManager().getPackageInfo(context.getPackageName(), 0);
             return info.versionCode;
-        } catch (PackageManager.NameNotFoundException e) {
+        } catch (Exception e) {
             e.printStackTrace();
         }
         return 1;

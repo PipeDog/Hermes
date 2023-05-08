@@ -379,7 +379,7 @@ public class DiskLruCache implements Closeable {
             for (int i = 0; i < valueCount; i++) {
                 ins[i] = new FileInputStream(entry.getCleanFile(i));
             }
-        } catch (FileNotFoundException e) {
+        } catch (Exception e) {
             // A file must have been deleted manually!
             for (int i = 0; i < valueCount; i++) {
                 if (ins[i] != null) {
@@ -702,7 +702,7 @@ public class DiskLruCache implements Closeable {
                 }
                 try {
                     return new FileInputStream(entry.getCleanFile(index));
-                } catch (FileNotFoundException e) {
+                } catch (Exception e) {
                     return null;
                 }
             }
@@ -741,12 +741,12 @@ public class DiskLruCache implements Closeable {
                 FileOutputStream outputStream;
                 try {
                     outputStream = new FileOutputStream(dirtyFile);
-                } catch (FileNotFoundException e) {
+                } catch (Exception e) {
                     // Attempt to recreate the cache directory.
                     directory.mkdirs();
                     try {
                         outputStream = new FileOutputStream(dirtyFile);
-                    } catch (FileNotFoundException e2) {
+                    } catch (Exception e2) {
                         // We are unable to recover. Silently eat the writes.
                         return NULL_OUTPUT_STREAM;
                     }
@@ -805,7 +805,7 @@ public class DiskLruCache implements Closeable {
             @Override public void write(int oneByte) {
                 try {
                     out.write(oneByte);
-                } catch (IOException e) {
+                } catch (Exception e) {
                     hasErrors = true;
                 }
             }
@@ -813,7 +813,7 @@ public class DiskLruCache implements Closeable {
             @Override public void write(byte[] buffer, int offset, int length) {
                 try {
                     out.write(buffer, offset, length);
-                } catch (IOException e) {
+                } catch (Exception e) {
                     hasErrors = true;
                 }
             }
@@ -821,7 +821,7 @@ public class DiskLruCache implements Closeable {
             @Override public void close() {
                 try {
                     out.close();
-                } catch (IOException e) {
+                } catch (Exception e) {
                     hasErrors = true;
                 }
             }
@@ -829,7 +829,7 @@ public class DiskLruCache implements Closeable {
             @Override public void flush() {
                 try {
                     out.flush();
-                } catch (IOException e) {
+                } catch (Exception e) {
                     hasErrors = true;
                 }
             }
@@ -874,7 +874,7 @@ public class DiskLruCache implements Closeable {
                 for (int i = 0; i < strings.length; i++) {
                     lengths[i] = Long.parseLong(strings[i]);
                 }
-            } catch (NumberFormatException e) {
+            } catch (Exception e) {
                 throw invalidLengths(strings);
             }
         }

@@ -123,7 +123,7 @@ public class StrictLineReader implements Closeable {
                     int length = (count > 0 && buf[count - 1] == CR) ? count - 1 : count;
                     try {
                         return new String(buf, 0, length, charset.name());
-                    } catch (UnsupportedEncodingException e) {
+                    } catch (Exception e) {
                         throw new AssertionError(e); // Since we control the charset this will never happen.
                     }
                 }
