@@ -26,12 +26,17 @@ import okhttp3.OkHttpClient;
 public class Hermes {
 
     public static class Registry {
+        private OkHttpClient httpClient = new OkHttpClient();
         private ICacheStorage cacheStorage;
         private Gson gson = JsonUtils.getGson();
-        private OkHttpClient httpClient = new OkHttpClient();
 
         public Registry(Context context) {
             this.cacheStorage = new CacheManager(context.getApplicationContext());
+        }
+
+        public Registry httpClient(OkHttpClient httpClient) {
+            this.httpClient = httpClient;
+            return this;
         }
 
         public Registry cacheStorage(ICacheStorage cacheStorage) {
@@ -41,11 +46,6 @@ public class Hermes {
 
         public Registry gson(Gson gson) {
             this.gson = gson;
-            return this;
-        }
-
-        public Registry httpClient(OkHttpClient httpClient) {
-            this.httpClient = httpClient;
             return this;
         }
 
@@ -64,9 +64,9 @@ public class Hermes {
     }
 
 
+    private OkHttpClient httpClient;
     private ICacheStorage cacheStorage;
     private Gson gson;
-    private OkHttpClient httpClient;
 
     private ExecutorFactory executorFactory = new ExecutorFactory();
     private Map<String, Request> requestTable = new HashMap<>();
@@ -75,10 +75,10 @@ public class Hermes {
     // 仅采用了单线程线程池，来保证 requestTable 以及 executorTable 的线程安全问题
     private ExecutorService serialExecutorService = Executors.newSingleThreadExecutor();
 
-    private Hermes(Registry builder) {
-        this.cacheStorage = builder.cacheStorage;
-        this.gson = builder.gson;
-        this.httpClient = builder.httpClient;
+    private Hermes(Registry registry) {
+        this.httpClient = registry.httpClient;
+        this.cacheStorage = registry.cacheStorage;
+        this.gson = registry.gson;
     }
 
 
