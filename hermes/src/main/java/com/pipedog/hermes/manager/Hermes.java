@@ -104,12 +104,12 @@ public class Hermes {
 
     /**
      * 注意：
-     *      1、cancelRequests(IRequestFilter)
-     *      2、cancelAllRequests()
-     *  两个方法最终都是调用到 cancelRequest()，已经被打到单线程按照串行顺序执行，
-     *  且已经对 requestTable 进行了 copy 操作，这里无需再考虑线程安全问题
+     *      1、{@link Hermes#cancelRequests(RequestFilter)}
+     *      2、{@link Hermes#cancelAllRequests()}
+     *  两个方法最终都是调用到 {@link Hermes#cancelRequest(Request)}，已经被打到单线程按
+     *  照串行顺序执行，且已经对 requestTable 进行了 copy 操作，这里无需再考虑线程安全问题
      */
-    public void cancelRequests(IRequestFilter filter) {
+    public void cancelRequests(RequestFilter filter) {
         if (filter == null) {
             return;
         }
