@@ -33,9 +33,6 @@ public class DiskCache implements IDiskCache {
 
     public DiskCache(Context context, String cacheDirPath) {
         try {
-            if (cacheDirPath == null || cacheDirPath.length() == 0) {
-                cacheDirPath = context.getExternalCacheDir().getAbsoluteFile() + File.separator + "hermes";
-            }
             directory = new File(cacheDirPath);
             mDiskLruCache = DiskLruCache.open(directory, getAppVersion(context), valueCount, maxSize);
         } catch (Exception e) {

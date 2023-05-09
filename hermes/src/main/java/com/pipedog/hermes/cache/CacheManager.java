@@ -2,6 +2,7 @@ package com.pipedog.hermes.cache;
 
 import android.content.Context;
 
+import java.io.File;
 import java.io.Serializable;
 
 import com.pipedog.hermes.cache.engine.CacheEngine;
@@ -15,6 +16,11 @@ import com.pipedog.hermes.cache.engine.ICacheEngine;
 public class CacheManager implements ICacheStorage {
 
     private ICacheEngine mCacheEngine;
+
+    public CacheManager(Context context) {
+        String cacheDirPath = context.getExternalCacheDir().getAbsoluteFile() + File.separator + "hermes";
+        mCacheEngine = new CacheEngine(context.getApplicationContext(), cacheDirPath);
+    }
 
     public CacheManager(Context context, String cacheDirPath) {
         mCacheEngine = new CacheEngine(context.getApplicationContext(), cacheDirPath);

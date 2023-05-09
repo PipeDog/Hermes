@@ -81,7 +81,7 @@ public class Request {
      */
     public <T> Request call(Callback<T> callback) {
         this.callback = callback;
-        Hermes.getInstance().addRequest(this);
+        Hermes.global().addRequest(this);
         return this;
     }
 
@@ -89,7 +89,7 @@ public class Request {
      * 取消请求
      */
     public void cancel() {
-        Hermes.getInstance().cancelRequest(this);
+        Hermes.global().cancelRequest(this);
     }
 
 

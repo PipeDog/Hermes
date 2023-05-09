@@ -31,7 +31,7 @@ public class Hermes {
         private OkHttpClient httpClient = new OkHttpClient();
 
         public Registry(Context context) {
-            this.cacheStorage = new CacheManager(context, null);
+            this.cacheStorage = new CacheManager(context);
         }
 
         public Registry cacheStorage(ICacheStorage cacheStorage) {
@@ -56,9 +56,9 @@ public class Hermes {
 
     private static Hermes sInstance;
 
-    public static Hermes getInstance() {
+    public static Hermes global() {
         if (sInstance == null) {
-            throw new IllegalArgumentException("null sInstance, call NetworkManager::init() first!");
+            throw new NullPointerException("sInstance == null");
         }
         return sInstance;
     }
