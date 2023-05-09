@@ -31,7 +31,7 @@ public class Hermes {
         private OkHttpClient httpClient = new OkHttpClient();
 
         public Registry(Context context) {
-            this.cacheStorage = new CacheManager(context);
+            this.cacheStorage = new CacheManager(context.getApplicationContext());
         }
 
         public Registry cacheStorage(ICacheStorage cacheStorage) {
