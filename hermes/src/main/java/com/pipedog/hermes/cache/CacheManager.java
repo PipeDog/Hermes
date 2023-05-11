@@ -27,7 +27,7 @@ public class CacheManager implements ICacheStorage {
     }
 
     @Override
-    public <T extends Serializable> void save(String key, T value, ICacheListener listener) {
+    public <T extends Serializable> void save(String key, T value, OnCacheListener listener) {
         mCacheEngine.saveCache(key,value, listener);
     }
 
@@ -37,7 +37,7 @@ public class CacheManager implements ICacheStorage {
     }
 
     @Override
-    public void get(String key, ICacheListener listener) {
+    public void get(String key, OnCacheListener listener) {
         mCacheEngine.getCache(key, listener);
     }
 

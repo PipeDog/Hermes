@@ -2,7 +2,7 @@ package com.pipedog.hermes.cache.engine;
 
 import java.io.Serializable;
 
-import com.pipedog.hermes.cache.ICacheListener;
+import com.pipedog.hermes.cache.OnCacheListener;
 
 /**
  * @author liang
@@ -18,7 +18,7 @@ public interface ICacheEngine {
      * @param listener
      * @param <T>
      */
-    <T extends Serializable> void saveCache(String key, T value, ICacheListener<T> listener);
+    <T extends Serializable> void saveCache(String key, T value, OnCacheListener<T> listener);
 
     /**
      * 保存缓存
@@ -34,7 +34,7 @@ public interface ICacheEngine {
      * @param listener
      * @return
      */
-    <T extends Serializable>  void getCache(String key, ICacheListener<T> listener);
+    <T extends Serializable>  void getCache(String key, OnCacheListener<T> listener);
 
     /**
      * 获取缓存

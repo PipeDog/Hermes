@@ -3,11 +3,8 @@ package com.pipedog.hermes.cache.engine;
 import android.content.Context;
 
 import java.io.Serializable;
-import java.util.concurrent.Semaphore;
-import java.util.concurrent.atomic.AtomicBoolean;
-import java.util.concurrent.atomic.AtomicReference;
 
-import com.pipedog.hermes.cache.ICacheListener;
+import com.pipedog.hermes.cache.OnCacheListener;
 import com.pipedog.hermes.cache.disk.DiskCache;
 import com.pipedog.hermes.cache.disk.IDiskCache;
 import com.pipedog.hermes.cache.memory.IMemoryCache;
@@ -30,16 +27,15 @@ public class CacheEngine implements ICacheEngine {
     }
 
     @Override
-    public <T extends Serializable> void saveCache(String key, T value, ICacheListener<T> listener) {
+    public <T extends Serializable> void saveCache(String key, T value, OnCacheListener<T> listener) {
         ThreadUtils.runOnIOThread(new Runnable() {
             @Override
             public void run() {
-                boolean result = mDiskCache.saveSerializable(key, value);
+                boolean result = saveCache(key, value);
                 if (result) {
-                    mMemoryCache.saveMemoryCache(key, value);
-                    cacheSuccess(value, listener);
+                    onCacheSuccess(value, listener);
                 } else {
-                    cacheFail(listener);
+                    onCacheFailed(listener, 1000, "Save cache failed!");
                 }
             }
         });
@@ -47,94 +43,39 @@ public class CacheEngine implements ICacheEngine {
 
     @Override
     public <T extends Serializable> boolean saveCache(String key, T value) {
-        final Semaphore semaphore = new Semaphore(0);
-        final AtomicBoolean result = new AtomicBoolean(false);
-
-        ThreadUtils.runOnIOThread(new Runnable() {
-            @Override
-            public void run() {
-                result.set(mDiskCache.saveSerializable(key, value));
-                if (result.get()) {
-                    mMemoryCache.saveMemoryCache(key, value);
-                }
-                semaphore.release();
-            }
-        });
-
-        try {
-            semaphore.acquire();
-        } catch (Exception e) {
-            e.printStackTrace();
+        boolean result = mDiskCache.saveSerializable(key, value);
+        if (!result) {
+            return false;
         }
 
-        return result.get();
+        mMemoryCache.saveMemoryCache(key, value);
+        return true;
     }
 
     @Override
-    public <T extends Serializable> void getCache(String key, ICacheListener<T> listener) {
-        T result = mMemoryCache.getMemoryCache(key);
-        if (result != null) {
-            listener.onCacheSuccess(result);
-            return;
-        }
-        getCacheFromDisk(key, listener);
+    public <T extends Serializable> void getCache(String key, OnCacheListener<T> listener) {
+        ThreadUtils.runOnIOThread(new Runnable() {
+            @Override
+            public void run() {
+                T result = getCache(key);
+                if (result != null) {
+                    onCacheSuccess(result, listener);
+                } else {
+                    onCacheFailed(listener, 1001, "Get cache failed!");
+                }
+            }
+        });
     }
 
     @Override
     public <T extends Serializable> T getCache(String key) {
-        final Semaphore semaphore = new Semaphore(0);
-        final AtomicReference<T> value = new AtomicReference<>();
-
-        ThreadUtils.runOnIOThread(new Runnable() {
-            @Override
-            public void run() {
-                value.set(mMemoryCache.getMemoryCache(key));
-                if (value.get() == null) {
-                    value.set(mDiskCache.getSerializable(key));
-                }
-                semaphore.release();
-            }
-        });
-
-        try {
-            semaphore.acquire();
-        } catch (Exception e) {
-            e.printStackTrace();
+        T result = mMemoryCache.getMemoryCache(key);
+        if (result != null) {
+            return result;
         }
 
-        return value.get();
-    }
-
-    private <T extends Serializable> void getCacheFromDisk(String key, ICacheListener<T> listener) {
-        ThreadUtils.runOnIOThread(new Runnable() {
-            @Override
-            public void run() {
-                T result = mDiskCache.getSerializable(key);
-                if (result != null) {
-                    cacheSuccess(result, listener);
-                } else {
-                    cacheFail(listener);
-                }
-            }
-        });
-    }
-
-    private <T extends Serializable> void cacheSuccess(T t, ICacheListener<T> listener) {
-        ThreadUtils.runOnUIThread(new Runnable() {
-            @Override
-            public void run() {
-                listener.onCacheSuccess(t);
-            }
-        });
-    }
-
-    private <T extends Serializable> void cacheFail(ICacheListener<T> listener) {
-        ThreadUtils.runOnUIThread(new Runnable() {
-            @Override
-            public void run() {
-                listener.onCacheFail("0", "");
-            }
-        });
+        result = mDiskCache.getSerializable(key);
+        return result;
     }
 
     @Override
@@ -147,6 +88,29 @@ public class CacheEngine implements ICacheEngine {
     public void clear() {
         mDiskCache.clear();
         mMemoryCache.clear();
+    }
+
+
+    // PRIVATE METHODS
+
+    private <T extends Serializable> void onCacheSuccess(T t, OnCacheListener<T> listener) {
+        if (listener == null) {
+            return;
+        }
+
+        ThreadUtils.runOnUIThread(() -> {
+            listener.onCacheSuccess(t);
+        });
+    }
+
+    private <T extends Serializable> void onCacheFailed(OnCacheListener<T> listener, int code, String message) {
+        if (listener == null) {
+            return;
+        }
+
+        ThreadUtils.runOnUIThread(() -> {
+            listener.onCacheFailed(code, message);
+        });
     }
 
 }

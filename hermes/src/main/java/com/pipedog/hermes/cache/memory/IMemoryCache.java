@@ -2,8 +2,6 @@ package com.pipedog.hermes.cache.memory;
 
 import java.io.Serializable;
 
-import com.pipedog.hermes.cache.ICacheListener;
-
 /**
  * @author liang
  * @time 2022/05/30

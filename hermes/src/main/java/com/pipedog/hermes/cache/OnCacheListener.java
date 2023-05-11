@@ -7,19 +7,19 @@ import java.io.Serializable;
  * @time 2022/05/30
  * @desc 缓存读写回调
  */
-public interface ICacheListener<T extends Serializable> {
+public interface OnCacheListener<T extends Serializable> {
 
     /**
      * 缓存成功
-     * @param result
+     * @param result 缓存结果
      */
     void onCacheSuccess(T result);
 
     /**
      * 缓存失败
-     * @param code
-     * @param msg
+     * @param code 错误码
+     * @param message 错误描述
      */
-    void onCacheFail(String code, String msg);
+    void onCacheFailed(int code, String message);
 
 }
