@@ -32,7 +32,7 @@ public interface ICacheStorage {
      * @param listener
      * @return
      */
-    void get(String key, OnCacheListener listener);
+    <T extends Serializable> void get(String key, OnCacheListener<T> listener);
 
     /**
      * 获取缓存

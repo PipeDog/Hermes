@@ -6,7 +6,6 @@ import java.io.File;
 import java.io.Serializable;
 
 import com.pipedog.hermes.cache.engine.CacheEngine;
-import com.pipedog.hermes.cache.engine.ICacheEngine;
 
 /**
  * @author liang
@@ -15,7 +14,7 @@ import com.pipedog.hermes.cache.engine.ICacheEngine;
  */
 public class CacheManager implements ICacheStorage {
 
-    private ICacheEngine mCacheEngine;
+    private ICacheStorage mCacheEngine;
 
     public CacheManager(Context context) {
         String cacheDirPath = context.getExternalCacheDir().getAbsoluteFile() + File.separator + "hermes";
@@ -28,27 +27,27 @@ public class CacheManager implements ICacheStorage {
 
     @Override
     public <T extends Serializable> void save(String key, T value, OnCacheListener listener) {
-        mCacheEngine.saveCache(key,value, listener);
+        mCacheEngine.save(key,value, listener);
     }
 
     @Override
     public <T extends Serializable> boolean save(String key, T value) {
-        return mCacheEngine.saveCache(key, value);
+        return mCacheEngine.save(key, value);
     }
 
     @Override
     public void get(String key, OnCacheListener listener) {
-        mCacheEngine.getCache(key, listener);
+        mCacheEngine.get(key, listener);
     }
 
     @Override
     public <T extends Serializable> T get(String key) {
-        return mCacheEngine.getCache(key);
+        return mCacheEngine.get(key);
     }
 
     @Override
     public void delete(String key) {
-        mCacheEngine.deleteCache(key);
+        mCacheEngine.delete(key);
     }
 
     @Override

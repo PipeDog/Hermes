@@ -4,6 +4,7 @@ import android.content.Context;
 
 import java.io.Serializable;
 
+import com.pipedog.hermes.cache.ICacheStorage;
 import com.pipedog.hermes.cache.OnCacheListener;
 import com.pipedog.hermes.cache.disk.DiskCache;
 import com.pipedog.hermes.cache.disk.IDiskCache;
@@ -16,7 +17,7 @@ import com.pipedog.hermes.cache.utils.ThreadUtils;
  * @time 2022/05/30
  * @desc 缓存引擎，加入线程切换逻辑
  */
-public class CacheEngine implements ICacheEngine {
+public class CacheEngine implements ICacheStorage {
 
     private IDiskCache mDiskCache;
     private IMemoryCache mMemoryCache;
@@ -27,22 +28,19 @@ public class CacheEngine implements ICacheEngine {
     }
 
     @Override
-    public <T extends Serializable> void saveCache(String key, T value, OnCacheListener<T> listener) {
-        ThreadUtils.runOnIOThread(new Runnable() {
-            @Override
-            public void run() {
-                boolean result = saveCache(key, value);
-                if (result) {
-                    onCacheSuccess(value, listener);
-                } else {
-                    onCacheFailed(listener, 1000, "Save cache failed!");
-                }
+    public <T extends Serializable> void save(String key, T value, OnCacheListener listener) {
+        ThreadUtils.runOnIOThread(() -> {
+            boolean result = save(key, value);
+            if (result) {
+                onCacheSuccess(value, listener);
+            } else {
+                onCacheFailed(listener, 1000, "Save cache failed!");
             }
         });
     }
 
     @Override
-    public <T extends Serializable> boolean saveCache(String key, T value) {
+    public <T extends Serializable> boolean save(String key, T value) {
         boolean result = mDiskCache.saveSerializable(key, value);
         if (!result) {
             return false;
@@ -53,22 +51,19 @@ public class CacheEngine implements ICacheEngine {
     }
 
     @Override
-    public <T extends Serializable> void getCache(String key, OnCacheListener<T> listener) {
-        ThreadUtils.runOnIOThread(new Runnable() {
-            @Override
-            public void run() {
-                T result = getCache(key);
-                if (result != null) {
-                    onCacheSuccess(result, listener);
-                } else {
-                    onCacheFailed(listener, 1001, "Get cache failed!");
-                }
+    public <T extends Serializable> void get(String key, OnCacheListener<T> listener) {
+        ThreadUtils.runOnIOThread(() -> {
+            T result = get(key);
+            if (result != null) {
+                onCacheSuccess(result, listener);
+            } else {
+                onCacheFailed(listener, 1001, "Get cache failed!");
             }
         });
     }
 
     @Override
-    public <T extends Serializable> T getCache(String key) {
+    public <T extends Serializable> T get(String key) {
         T result = mMemoryCache.getMemoryCache(key);
         if (result != null) {
             return result;
@@ -79,7 +74,7 @@ public class CacheEngine implements ICacheEngine {
     }
 
     @Override
-    public void deleteCache(String key) {
+    public void delete(String key) {
         mDiskCache.deleteCache(key);
         mMemoryCache.deleteMemoryCache(key);
     }
