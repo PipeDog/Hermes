@@ -70,7 +70,7 @@ public class Hermes {
 
     private ExecutorFactory executorFactory = new ExecutorFactory();
     private Map<String, Request> requestTable = new HashMap<>();
-    private Map<String, AbstractExecutor> executorTable = new HashMap<>();;
+    private Map<String, AbstractExecutor> executorTable = new HashMap<>();
     // 因为 okhttp 拥有自己的线程管理，这里无需过多干涉 Request 的任务分配，因此这里
     // 仅采用了单线程线程池，来保证 requestTable 以及 executorTable 的线程安全问题
     private ExecutorService serialExecutorService = Executors.newSingleThreadExecutor();
